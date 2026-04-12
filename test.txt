@@ -1,0 +1,70 @@
+A. Phần điểm (7 điểm)
+1. Phân hệ dành cho Khách hàng (User)
+Mục tiêu là trải nghiệm mượt mà, dễ tìm kiếm và thanh toán.
+• Đăng ký Đăng nhập Hỗ trợ đăng ký tài khoản mới, đăng nhập (có thể mở rộng
+thêm Google ,Facebook), và chức năng quên mật khẩu.
+• Trang chủ Hiển thị danh mục sản phẩm, sản phẩm mới nhất, sản phẩm giảm giá
+hoặc sản phẩm nổi bật.
+• Tìm kiếm & Lọc Tìm kiếm theo tên sản phẩm, lọc theo khoảng giá, loại sản phẩm
+hoặc thương hiệu.
+• Chi tiết sản phẩm Hiển thị hình ảnh, mô tả chi tiết, giá, số lượng tồn kho và các
+đánh giá từ người mua trước.
+• Giỏ hàng Thêm Sửa Xóa sản phẩm trong giỏ hàng, cập nhật số lượng và tính tổng
+tiền thời gian thực.
+• Thanh toán Nhập thông tin giao hàng, chọn phương thức thanh toán (COD hoặc
+ví điện tử thẻ) và xác nhận đơn hàng.
+• Lịch sử đơn hàng Xem lại các đơn hàng đã đặt, trạng thái đơn hàng (Chờ duyệt,
+Đang giao, Đã giao).
+2. Phân hệ dành cho Quản trị viên (Admin)
+Mục tiêu là quản trị dữ liệu một cách chặt chẽ và bảo mật.
+• Bảng điều khiển (Dashboard) Thống kê nhanh doanh thu theo ngày tháng, tổng
+số đơn hàng mới và số lượng khách hàng.
+• Quản lý Danh mục Thêm, sửa, xóa các loại hàng hóa (ví dụ Váy bé gái, Giày dép,
+Phụ kiện).
+• Quản lý Sản phẩm  Thêm sản phẩm mới với nhiều hình ảnh.
+o Quản lý tồn kho (Số lượng còn lại).
+o Thiết lập giá bán và các chương trình khuyến mãi.
+• Quản lý Đơn hàng Xem danh sách đơn hàng, thay đổi trạng thái đơn hàng và in
+hóa đơn nếu cần.
+• Quản lý Người dùng Danh sách khách hàng, khóa mở khóa tài khoản người dùng.
+• Quản lý Đánh giá Kiểm duyệt hoặc xóa các bình luận, đánh giá không phù hợp từ
+khách hàng.
+B. Phần 3 điểm
+1. Yêu cầu chi tiết về Nghiệp vụ (Logic phía Backend)
+• Quản lý Kho (Inventory Management)
+o Tự động trừ số lượng tồn kho khi đơn hàng được đặt thành công.
+o Thông báo trong trang Admin khi sản phẩm sắp hết hàng (ví dụ số lượng 
+5).
+o Ngăn chặn User thêm vào giỏ hàng số lượng lớn hơn số lượng còn trong kho.
+• Hệ thống Khuyến mãi (Promotion & Coupons)
+o Tạo mã giảm giá (Coupon) theo phần trăm hoặc số tiền cố định.
+o Thiết lập điều kiện áp dụng (ví dụ đơn hàng trên 500k mới được dùng mã).
+o Hiển thị giá gốc và giá sau khi giảm (Sale price) một cách rõ ràng.
+• Trạng thái Đơn hàng Logic
+o Quy định luồng chuyển trạng thái Chờ xác nhận - Đã xác nhận - Đang
+giao - Hoàn thành.
+o Chỉ cho phép khách hàng hủy đơn khi đơn hàng đang ở trạng thái Chờ xác
+nhận.
+2. Yêu cầu về Trải nghiệm Người dùng ( UXFrontend )
+Giúp trang web trông chuyên nghiệp như một trang thương mại điện tử thực thụ.
+• Bộ lọc thông minh (Multi-filtering) Cho phép người dùng lọc kết hợp nhiều điều
+kiện cùng lúc (Ví dụ Vừa chọn loại Váy công chúa, vừa chọn khoảng giá 200k
+- 500k).
+• Sắp xếp sản phẩm Theo giá tăng giảm dần, theo độ phổ biến hoặc theo sản phẩm
+mới nhất.
+• Xem nhanh (Quick View) Hiển thị modal thông tin sản phẩm ngay tại danh sách
+mà không cần chuyển trang.
+• Trạng thái đăng nhập Lưu phiên đăng nhập (Remember me) để khách hàng không
+phải login lại nhiều lần.
+• Phản hồi (Feedback) Hiển thị thông báo (Toast message) khi thêm hàng vào giỏ
+thành công hoặc khi nhập sai mật khẩu.
+3. Yêu cầu về Bảo mật & Hệ thống
+• Phân quyền (Authorization)  Sử dụng Middleware hoặc Security Filter để chặn
+truy cập trái phép.
+o Nếu một User cố tình gõ đường dẫn admin trên trình duyệt, hệ thống phải tự
+động đá về trang Login hoặc trang 403 Forbidden.
+• Validation (Kiểm tra dữ liệu đầu vào)
+o Kiểm tra định dạng Email, độ dài mật khẩu, số điện thoại phải là số.
+o Phía Admin Không cho phép để trống tên sản phẩm hoặc nhập giá tiền âm.
+• Lưu trữ hình ảnh Thay vì lưu trực tiếp ảnh vào Database (làm chậm DB), hãy lưu
+ảnh trong thư mục server và chỉ lưu đường dẫn (path) vào Database.

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Trang chủ')}"></head>
+<style>
+    .hero-banner {
+        width: 100%;
+        height: 400px;
+        background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://picsum.photos/1200/400?random=banner') no-repeat center center/cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        text-align: center;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+    .section-title {
+        margin: 40px 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 5px solid var(--primary-red);
+        padding-left: 15px;
+    }
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+    .category-item {
+        background: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        transition: 0.3s;
+    }
+    .category-item:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        color: var(--primary-red);
+    }
+    .sale-badge {
+        background: var(--primary-red);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+</style>
+<body>
+    <header th:replace="~{fragments :: header}"></header>
+
+    <main class="container">
+        <!-- Banner -->
+        <div class="hero-banner">
+            <div>
+                <h1 style="font-size: 40px;">SĂN DEAL HÈ RỰC RỠ</h1>
+                <p>Ưu đãi lên tới 50% các sản phẩm VGA, CPU, Mainboard</p>
+                <a href="/linh-kien-may-tinh" class="add-to-cart" style="display: inline-block; width: auto; padding: 10px 30px; margin-top: 20px;">XEM NGAY</a>
+            </div>
+        </div>
+        
+        <!-- Sản phẩm giảm giá -->
+        <div class="section-title">
+            <h3>SẢN PHẨM KHUYẾN MÃI <span class="sale-badge">Hot Deal</span></h3>
+            <a href="/linh-kien-may-tinh" style="color: blue;">Xem tất cả</a>
+        </div>
+        <div class="product-grid">
+            <div th:each="product : ${saleProducts}" class="product-card">
+                <div class="product-badge" th:text="${'-' + product.getDiscountPercentage() + '%'}">-0%</div>
+                <img th:src="${product.imageUrl}" class="product-image">
+                <div class="product-title" th:text="${product.name}">Product Name</div>
+                <div class="product-price">
+                    <span class="current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
+                    <span class="original-price" th:if="${product.salePrice > 0}" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
+                </div>
+                <form th:action="@{/cart/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="add-to-cart">THÊM GIỎ HÀNG</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
+
+</body>
+</html>

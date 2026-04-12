@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Tin tức công nghệ')}"></head>
+<body>
+    <header th:replace="~{fragments :: header}"></header>
+
+    <main class="container">
+        <h2 style="margin: 30px 0; border-left: 5px solid var(--primary-red); padding-left: 15px;">TIN TỨC CÔNG NGHỆ</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px;">
+            <!-- Tin 1 -->
+            <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <img src="https://picsum.photos/600/300?random=101" style="width: 100%; height: 200px; object-fit: cover;">
+                <div style="padding: 20px;">
+                    <h3 style="margin-bottom: 10px;">Đánh giá chi tiết NVIDIA RTX 4090: Quái vật hiệu năng</h3>
+                    <p style="color: #666; font-size: 14px;">Khám phá sức mạnh thực tế của chiếc card đồ họa mạnh nhất thế giới hiện nay...</p>
+                    <a href="#" style="color: var(--primary-red); font-weight: bold; display: block; margin-top: 15px;">Đọc thêm</a>
+                </div>
+            </div>
+            <!-- Tin 2 -->
+            <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <img src="https://picsum.photos/600/300?random=102" style="width: 100%; height: 200px; object-fit: cover;">
+                <div style="padding: 20px;">
+                    <h3 style="margin-bottom: 10px;">Top 5 Laptop Gaming đáng mua nhất đầu năm 2026</h3>
+                    <p style="color: #666; font-size: 14px;">Danh sách những mẫu laptop cân mọi tựa game AAA mà bạn không nên bỏ lỡ...</p>
+                    <a href="#" style="color: var(--primary-red); font-weight: bold; display: block; margin-top: 15px;">Đọc thêm</a>
+                </div>
+            </div>
+            <!-- Tin 3 -->
+            <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <img src="https://picsum.photos/600/300?random=103" style="width: 100%; height: 200px; object-fit: cover;">
+                <div style="padding: 20px;">
+                    <h3 style="margin-bottom: 10px;">Hướng dẫn Build PC tối ưu cho thiết kế đồ họa</h3>
+                    <p style="color: #666; font-size: 14px;">Lựa chọn linh kiện như thế nào để vừa tiết kiệm chi phí vừa đạt hiệu suất cao nhất...</p>
+                    <a href="#" style="color: var(--primary-red); font-weight: bold; display: block; margin-top: 15px;">Đọc thêm</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

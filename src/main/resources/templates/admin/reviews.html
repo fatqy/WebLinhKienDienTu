@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <h2 style="margin-bottom: 25px;">QUẢN LÝ ĐÁNH GIÁ</h2>
+        
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Người dùng</th>
+                    <th>Đánh giá</th>
+                    <th>Bình luận</th>
+                    <th>Ngày</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="r : ${reviews}">
+                    <td th:text="${r.product.name}">Product</td>
+                    <td th:text="${r.user.username}">User</td>
+                    <td>
+                        <span th:each="i : ${#numbers.sequence(1, r.rating)}" style="color: gold;"><i class="fas fa-star"></i></span>
+                    </td>
+                    <td th:text="${r.comment}">Comment</td>
+                    <td th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy')}">Date</td>
+                    <td>
+                        <form th:action="@{/admin/reviews/delete}" method="post">
+                            <input type="hidden" name="reviewId" th:value="${r.id}">
+                            <button type="submit" class="btn-action" style="background: var(--primary-red); color: white;">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(reviews)}" style="text-align: center; padding: 50px; color: #999;">
+            Chưa có đánh giá nào từ khách hàng.
+        </div>
+    </div>
+</body>
+</html>

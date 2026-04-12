@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' – GEARVN.COM'">GEARVN</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header th:fragment="header" class="header">
+        <div class="header-top">
+            <div class="container">
+                <a href="#"><i class="fas fa-phone"></i> Hotline 1900.5301</a>
+                <a href="#"><i class="fas fa-map-marker-alt"></i> Hệ thống Showroom</a>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="container" style="display: flex; align-items: center; width: 100%; gap: 30px;">
+                <div class="logo"><a href="/" style="color: var(--primary-red); text-decoration: none;">GEARVN</a></div>
+                <div class="search-bar">
+                    <form th:action="@{/search}" method="get" style="display: flex; width: 100%;">
+                        <input type="text" name="q" placeholder="Bạn cần tìm gì?" th:value="${searchQuery}">
+                        <button type="submit"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+                <div class="header-actions">
+                    <div sec:authorize="isAnonymous()" class="action-item">
+                        <a href="/login"><i class="fas fa-user"></i> <span>Đăng nhập</span></a>
+                    </div>
+                    <div sec:authorize="isAuthenticated()" class="action-item">
+                        <a href="/order-history"><i class="fas fa-user-check"></i> <span sec:authentication="name">User</span></a>
+                    </div>
+                    <div class="action-item">
+                        <a href="/cart"><i class="fas fa-shopping-cart"></i> <span>Giỏ hàng</span></a>
+                    </div>
+                    <div sec:authorize="hasAuthority('ROLE_ADMIN')" class="action-item">
+                        <a href="/admin/dashboard" style="color: blue;"><i class="fas fa-user-shield"></i> <span>ADMIN</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="header-nav">
+            <div class="container">
+                <ul>
+                    <li class="dropdown">
+                        <i class="fas fa-bars"></i> <span>Danh mục sản phẩm</span>
+                        <div class="dropdown-content">
+                            <a th:each="cat : ${categories}" 
+                               th:href="@{/category/{id}(id=${cat.id})}" 
+                               th:text="${cat.name}">Category</a>
+                            <a href="/linh-kien-may-tinh" style="border-top: 1px solid #eee; font-weight: bold;">Tất cả sản phẩm</a>
+                        </div>
+                    </li>
+                    <li th:each="cat : ${categories}" th:if="${cat.name == 'PC GVN'}">
+                        <a th:href="@{/category/{id}(id=${cat.id})}">PC GVN</a>
+                    </li>
+                    <li th:each="cat : ${categories}" th:if="${cat.name == 'Laptop'}">
+                        <a th:href="@{/category/{id}(id=${cat.id})}">Laptop</a>
+                    </li>
+                    <li th:each="cat : ${categories}" th:if="${cat.name == 'Góc Gaming'}">
+                        <a th:href="@{/category/{id}(id=${cat.id})}">Góc Gaming</a>
+                    </li>
+                    <li><a href="/news">Tin tức</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <footer th:fragment="footer" class="footer" style="margin-top: 50px;">
+        <div class="container" style="text-align: center;">
+            &copy; 2026 GEARVN CLONE - Laravel MySQL Laragon
+        </div>
+    </footer>
+
+</body>
+</html>

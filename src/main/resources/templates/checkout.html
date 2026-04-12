@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán đơn hàng – GEARVN.COM</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .checkout-container { display: flex; gap: 40px; margin-top: 30px; }
+        .checkout-form { flex: 1.5; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .order-summary-sidebar { flex: 1; background: #fafafa; padding: 25px; border-radius: 8px; border: 1px solid #eee; height: fit-content; }
+        .form-section h3 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; font-size: 16px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .order-item-mini { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .total-row { border-top: 2px solid #ddd; margin-top: 15px; padding-top: 15px; display: flex; justify-content: space-between; font-weight: bold; font-size: 20px; color: var(--primary-red); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-main">
+            <div class="container">
+                <div class="logo"><a href="/" style="color: var(--primary-red);">GEARVN</a></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="checkout-container">
+            <div class="checkout-form">
+                <form th:action="@{/checkout}" method="post">
+                    <div class="form-section">
+                        <h3>Thông tin giao hàng</h3>
+                        <div class="form-group">
+                            <label>Họ và tên người nhận</label>
+                            <input type="text" name="fullName" th:value="${user.fullName}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại</label>
+                            <input type="text" name="phoneNumber" th:value="${user.phoneNumber}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ nhận hàng</label>
+                            <input type="text" name="address" th:value="${user.address}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section" style="margin-top: 30px;">
+                        <h3>Phương thức thanh toán</h3>
+                        <div class="form-group">
+                            <select name="paymentMethod">
+                                <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                                <option value="E-WALLET">Ví điện tử / Chuyển khoản</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-checkout" style="margin-top: 30px;">XÁC NHẬN ĐẶT HÀNG</button>
+                </form>
+            </div>
+
+            <aside class="order-summary-sidebar">
+                <h3 style="margin-bottom: 20px;">Đơn hàng của bạn</h3>
+                <div th:each="item : ${cartItems}" class="order-item-mini">
+                    <span th:text="${item.product.name} + ' x' + ${item.quantity}">Product Name x1</span>
+                    <span th:text="${#numbers.formatDecimal((item.product.salePrice > 0 ? item.product.salePrice : item.product.originalPrice) * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫'}">Price</span>
+                </div>
+                <div class="total-row">
+                    <span>TỔNG CỘNG:</span>
+                    <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">Total</span>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

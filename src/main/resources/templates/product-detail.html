@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${product.name})}"></head>
+<style>
+    .product-detail-container { display: flex; gap: 40px; background: white; padding: 30px; border-radius: 8px; margin-top: 20px; }
+    .product-detail-image { flex: 1; text-align: center; }
+    .product-detail-image img { max-width: 100%; height: auto; border: 1px solid #eee; }
+    .product-detail-info { flex: 1.5; }
+    .product-detail-info h1 { font-size: 24px; margin-bottom: 15px; }
+    .price-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .detail-current-price { color: var(--primary-red); font-size: 28px; font-weight: bold; }
+    .detail-original-price { color: #999; text-decoration: line-through; margin-left: 15px; font-size: 18px; }
+    .stock-status { margin-bottom: 20px; font-weight: 500; }
+    .quantity-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
+    .quantity-selector input { width: 60px; padding: 8px; text-align: center; border: 1px solid var(--border-color); }
+    .btn-buy-now { background: var(--primary-red); color: white; border: none; padding: 15px 40px; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+    .btn-buy-now:hover { background: #c10015; }
+    .product-description { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; }
+</style>
+<body>
+    <header th:replace="~{fragments :: header}"></header>
+
+    <main class="container">
+        <nav style="margin: 20px 0; font-size: 14px; color: #666;">
+            <a href="/">Trang chủ</a> / 
+            <a th:href="@{/category/{id}(id=${product.category.id})}" th:text="${product.category.name}">Category</a> / 
+            <span th:text="${product.name}">Product</span>
+        </nav>
+
+        <div class="product-detail-container">
+            <div class="product-detail-image">
+                <img th:src="${product.imageUrl}" th:alt="${product.name}">
+            </div>
+            <div class="product-detail-info">
+                <h1 th:text="${product.name}">Product Name</h1>
+                <div class="stock-status">
+                    Tình trạng: <span th:style="${product.stock > 0 ? 'color: green;' : 'color: red;'}" 
+                                      th:text="${product.stock > 0 ? 'Còn hàng (' + product.stock + ')' : 'Hết hàng'}">Còn hàng</span>
+                </div>
+                
+                <div class="price-box">
+                    <span class="detail-current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
+                    <span class="detail-original-price" th:if="${product.salePrice > 0}" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
+                </div>
+
+                <form th:action="@{/cart/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <div class="quantity-selector">
+                        <span>Số lượng:</span>
+                        <input type="number" name="quantity" value="1" min="1" th:max="${product.stock}">
+                    </div>
+                    <button type="submit" class="btn-buy-now" th:disabled="${product.stock <= 0}">
+                        <i class="fas fa-shopping-cart"></i> THÊM VÀO GIỎ HÀNG
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="product-description">
+            <h2 style="border-bottom: 2px solid var(--primary-red); display: inline-block; padding-bottom: 5px; margin-bottom: 20px;">MÔ TẢ CHI TIẾT</h2>
+            <div th:text="${product.description}">Mô tả đang được cập nhật...</div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Linh kiện máy tính')}"></head>
+<body>
+    <header th:replace="~{fragments :: header}"></header>
+
+    <main class="container">
+        <div class="main-content">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar">
+                <div class="filter-group">
+                    <div class="filter-title">Danh mục sản phẩm</div>
+                    <div class="filter-options">
+                        <div th:each="category : ${categories}" style="margin-bottom: 10px;">
+                            <a th:href="@{/category/{id}(id=${category.id})}" 
+                               th:text="${category.name}"
+                               th:style="${currentCategory == category.name ? 'color: var(--primary-red); font-weight: bold;' : ''}"
+                               style="font-size: 14px; display: block; padding: 5px 0; transition: 0.2s;">
+                               Category Name
+                            </a>
+                        </div>
+                        <a href="/linh-kien-may-tinh" style="font-size: 13px; color: blue; border-top: 1px solid #eee; display: block; margin-top: 10px; padding-top: 10px;">Tất cả sản phẩm</a>
+                    </div>
+                </div>
+                <!-- Có thể thêm các filter cứng khác ở đây -->
+                <div class="filter-group">
+                    <div class="filter-title">Khoảng giá</div>
+                    <div class="filter-options">
+                        <label class="filter-item"><input type="checkbox"> <span>Dưới 1 triệu</span></label>
+                        <label class="filter-item"><input type="checkbox"> <span>1 triệu - 5 triệu</span></label>
+                        <label class="filter-item"><input type="checkbox"> <span>Trên 10 triệu</span></label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Product Area -->
+            <section class="product-area">
+                <div class="sorting-bar">
+                    <div style="font-weight: bold; font-size: 18px;">Linh kiện máy tính</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span>Sắp xếp:</span>
+                        <select style="padding: 5px; border: 1px solid var(--border-color); border-radius: 4px;">
+                            <option>Mới nhất</option>
+                            <option>Giá thấp đến cao</option>
+                            <option>Giá cao đến thấp</option>
+                            <option>Bán chạy nhất</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="product-grid">
+                    <div th:each="product : ${products}" class="product-card">
+                        <div class="product-badge" th:if="${not #strings.isEmpty(product.badge)}" th:text="${product.badge}">Badge</div>
+                        <div class="product-badge" style="visibility: hidden;" th:if="${#strings.isEmpty(product.badge)}">.</div>
+                        <img th:src="${product.imageUrl}" th:alt="${product.name}" class="product-image">
+                        <div class="product-title" th:text="${product.name}">Product Name</div>
+                        <div class="product-price">
+                            <span class="current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
+                            <span class="original-price" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
+                        </div>
+                        <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Về GEARVN</h4>
+                    <ul>
+                        <li>Giới thiệu</li>
+                        <li>Tuyển dụng</li>
+                        <li>Liên hệ</li>
+                        <li>Hệ thống cửa hàng</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Chính sách</h4>
+                    <ul>
+                        <li>Chính sách bảo hành</li>
+                        <li>Chính sách đổi trả</li>
+                        <li>Chính sách vận chuyển</li>
+                        <li>Chính sách thanh toán</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Hỗ trợ khách hàng</h4>
+                    <ul>
+                        <li>Hotline: 1900.5301</li>
+                        <li>Email: cskh@gearvn.com</li>
+                        <li>Tra cứu bảo hành</li>
+                        <li>Hướng dẫn mua hàng</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Kết nối với chúng tôi</h4>
+                    <div style="display: flex; gap: 15px; font-size: 24px; color: var(--primary-red);">
+                        <i class="fab fa-facebook"></i>
+                        <i class="fab fa-youtube"></i>
+                        <i class="fab fa-tiktok"></i>
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <img src="https://file.hstatic.net/200000722513/file/logo-bct_019590509b704da0816965430e6191a1.png" alt="Bộ công thương" style="width: 120px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                &copy; 2026 GEARVN. All rights reserved. Công ty TNHH Thương Mại GEARVN.
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

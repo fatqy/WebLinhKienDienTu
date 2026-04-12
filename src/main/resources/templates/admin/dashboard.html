@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <h2 style="margin-bottom: 25px;">BẢNG ĐIỀU KHIỂN</h2>
+        
+        <div class="card-stats">
+            <div class="stat-item">
+                <h4>Tổng doanh thu</h4>
+                <p th:text="${#numbers.formatDecimal(revenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
+            </div>
+            <div class="stat-item">
+                <h4>Đơn hàng mới</h4>
+                <p th:text="${newOrdersCount}">0</p>
+            </div>
+            <div class="stat-item">
+                <h4>Khách hàng</h4>
+                <p th:text="${customerCount}">0</p>
+            </div>
+        </div>
+
+        <h3>Đơn hàng mới nhất</h3>
+        <table class="admin-table" style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${recentOrders}">
+                    <td th:text="'#' + ${order.id}">#1</td>
+                    <td th:text="${order.fullName}">User</td>
+                    <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Date</td>
+                    <td th:text="${order.getFormattedTotalAmount()}" style="color: var(--primary-red); font-weight: bold;">0₫</td>
+                    <td>
+                        <span th:class="'order-status status-' + ${order.status}" th:text="${order.status}">PENDING</span>
+                    </td>
+                    <td><a th:href="@{/admin/orders}" class="btn-action" style="background: #3498db; color: white;">Xem</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

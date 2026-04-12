@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2>QUẢN LÝ DANH MỤC</h2>
+            <form th:action="@{/admin/categories/add}" method="post" style="display: flex; gap: 10px;">
+                <input type="text" name="name" placeholder="Tên danh mục mới" required style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <button type="submit" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px;">+ THÊM</button>
+            </form>
+        </div>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên danh mục</th>
+                    <th>Số lượng sản phẩm</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="c : ${categories}">
+                    <td th:text="${c.id}">1</td>
+                    <td th:text="${c.name}" style="font-weight: bold;">Category Name</td>
+                    <td th:text="${c.products != null ? c.products.size() : 0}">0</td>
+                    <td>
+                        <button class="btn-action" style="background: #f39c12; color: white;">Sửa</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

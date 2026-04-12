@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2>QUẢN LÝ SẢN PHẨM</h2>
+            <button onclick="document.getElementById('addModal').style.display='block'" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px; font-size: 14px;">+ THÊM SẢN PHẨM</button>
+        </div>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá bán</th>
+                    <th>Tồn kho</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${products}">
+                    <td><img th:src="${p.imageUrl}" style="width: 50px;"></td>
+                    <td th:text="${p.name}">Name</td>
+                    <td th:text="${p.category.name}">Category</td>
+                    <td th:text="${p.getFormattedSalePrice()}">0₫</td>
+                    <td th:text="${p.stock}" th:style="${p.stock <= 5 ? 'color: red; font-weight: bold;' : ''}">0</td>
+                    <td>
+                        <a th:href="@{/admin/products/delete/{id}(id=${p.id})}" class="btn-action" style="background: var(--primary-red); color: white;" onclick="return confirm('Xác nhận xóa?')">Xóa</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Simple Add Modal -->
+        <div id="addModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+            <div style="background: white; width: 500px; margin: 50px auto; padding: 30px; border-radius: 8px;">
+                <h3>Thêm sản phẩm mới</h3>
+                <form th:action="@{/admin/products/add}" method="post" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Tên sản phẩm</label>
+                        <input type="text" name="name" required style="width: 100%; padding: 8px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Danh mục</label>
+                        <select name="categoryId" style="width: 100%; padding: 8px;">
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá gốc</label>
+                        <input type="number" name="originalPrice" required style="width: 100%; padding: 8px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Giá khuyến mãi</label>
+                        <input type="number" name="salePrice" style="width: 100%; padding: 8px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng tồn kho</label>
+                        <input type="number" name="stock" required style="width: 100%; padding: 8px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Link ảnh (URL)</label>
+                        <input type="text" name="imageUrl" required style="width: 100%; padding: 8px;">
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button type="submit" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px;">LƯU LẠI</button>
+                        <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="btn-action" style="background: #95a5a6; color: white; padding: 10px 20px;">HỦY</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

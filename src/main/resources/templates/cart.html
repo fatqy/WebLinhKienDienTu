@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng của bạn – GEARVN.COM</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .cart-table { width: 100%; border-collapse: collapse; margin-top: 30px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .cart-table th, .cart-table td { padding: 20px; text-align: left; border-bottom: 1px solid #eee; }
+        .cart-table th { background: #f9f9f9; text-transform: uppercase; font-size: 14px; }
+        .cart-product-img { width: 80px; height: 80px; object-fit: contain; border: 1px solid #eee; padding: 5px; }
+        .cart-summary { margin-top: 40px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 400px; margin-left: auto; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; }
+        .total-price { color: var(--primary-red); font-weight: bold; font-size: 24px; }
+        .btn-checkout { background: var(--primary-red); color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; transition: 0.3s; }
+        .btn-checkout:hover { background: #c10015; }
+        .btn-remove { color: #999; cursor: pointer; transition: 0.3s; }
+        .btn-remove:hover { color: var(--primary-red); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-main">
+            <div class="container" style="display: flex; align-items: center; width: 100%; gap: 30px;">
+                <div class="logo"><a href="/" style="color: var(--primary-red);">GEARVN</a></div>
+                <div style="flex-grow: 1; text-align: center; font-weight: bold; font-size: 20px;">GIỎ HÀNG</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div th:if="${#lists.isEmpty(cartItems)}" style="text-align: center; padding: 100px 0;">
+            <i class="fas fa-shopping-cart" style="font-size: 80px; color: #ddd; margin-bottom: 20px;"></i>
+            <h2>Giỏ hàng của bạn đang trống!</h2>
+            <p>Hãy dạo một vòng website để chọn những sản phẩm ưng ý nhé.</p>
+            <a href="/" class="btn-checkout" style="display: inline-block; width: auto; padding: 15px 40px; margin-top: 20px;">QUAY LẠI CỬA HÀNG</a>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(cartItems)}">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${cartItems}">
+                        <td><img th:src="${item.product.imageUrl}" class="cart-product-img"></td>
+                        <td>
+                            <div th:text="${item.product.name}" style="font-weight: 500;">Product Name</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;" th:text="'Kho: ' + ${item.product.stock}">Kho: 10</div>
+                        </td>
+                        <td th:text="${item.product.getFormattedCurrentPrice()}">Price</td>
+                        <td>
+                            <input type="number" th:value="${item.quantity}" min="1" th:max="${item.product.stock}" 
+                                   style="width: 50px; padding: 5px; border: 1px solid #ddd;">
+                        </td>
+                        <td th:text="${#numbers.formatDecimal((item.product.salePrice > 0 ? item.product.salePrice : item.product.originalPrice) * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫'}" 
+                            style="font-weight: bold; color: var(--primary-red);">Total</td>
+                        <td>
+                            <a th:href="@{/cart/remove/{id}(id=${item.id})}" class="btn-remove">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Tổng cộng:</span>
+                    <span class="total-price" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">Total</span>
+                </div>
+                <a href="/checkout" class="btn-checkout" style="display: block; text-align: center; text-decoration: none;">TIẾN HÀNH THANH TOÁN</a>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="/" style="color: #666; font-size: 14px;"><i class="fas fa-reply"></i> Tiếp tục mua hàng</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer" style="margin-top: 50px;">
+        <div class="container" style="text-align: center;">&copy; 2026 GEARVN CLONE</div>
+    </footer>
+</body>
+</html>

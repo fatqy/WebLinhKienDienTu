@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <h2 style="margin-bottom: 25px;">QUẢN LÝ NGƯỜI DÙNG</h2>
+        
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Email</th>
+                    <th>Họ và tên</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}">1</td>
+                    <td th:text="${user.username}">User</td>
+                    <td th:text="${user.email}">Email</td>
+                    <td th:text="${user.fullName}">Name</td>
+                    <td>
+                        <span th:if="${user.enabled}" style="color: green; font-weight: bold;">Hoạt động</span>
+                        <span th:if="${!user.enabled}" style="color: red; font-weight: bold;">Đã khóa</span>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/users/toggle-status}" method="post">
+                            <input type="hidden" name="userId" th:value="${user.id}">
+                            <button type="submit" class="btn-action" 
+                                    th:style="${user.enabled ? 'background: #e67e22; color: white;' : 'background: #27ae60; color: white;'}"
+                                    th:text="${user.enabled ? 'Khóa tài khoản' : 'Mở khóa'}">Toggle</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
