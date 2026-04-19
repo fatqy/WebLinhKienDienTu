@@ -1,31 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán đơn hàng – GEARVN.COM</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .checkout-container { display: flex; gap: 40px; margin-top: 30px; }
-        .checkout-form { flex: 1.5; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .order-summary-sidebar { flex: 1; background: #fafafa; padding: 25px; border-radius: 8px; border: 1px solid #eee; height: fit-content; }
-        .form-section h3 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; font-size: 16px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        .order-item-mini { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-        .total-row { border-top: 2px solid #ddd; margin-top: 15px; padding-top: 15px; display: flex; justify-content: space-between; font-weight: bold; font-size: 20px; color: var(--primary-red); }
-    </style>
-</head>
+<head th:replace="~{fragments :: head('Thanh toán')}"></head>
+<style>
+    .checkout-container { display: flex; gap: 40px; margin-top: 30px; margin-bottom: 50px; }
+    .checkout-form { flex: 1.5; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .order-summary-sidebar { flex: 1; background: #fafafa; padding: 25px; border-radius: 8px; border: 1px solid #eee; height: fit-content; }
+    .form-section h3 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; font-size: 16px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    .order-item-mini { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+    .total-row { border-top: 2px solid #ddd; margin-top: 15px; padding-top: 15px; display: flex; justify-content: space-between; font-weight: bold; font-size: 20px; color: var(--primary-red); }
+</style>
 <body>
-    <header class="header">
-        <div class="header-main">
-            <div class="container">
-                <div class="logo"><a href="/" style="color: var(--primary-red);">GEARVN</a></div>
-            </div>
-        </div>
-    </header>
+    <header th:replace="~{fragments :: header}"></header>
 
     <main class="container">
         <div class="checkout-container">
@@ -34,16 +22,16 @@
                     <div class="form-section">
                         <h3>Thông tin giao hàng</h3>
                         <div class="form-group">
-                            <label>Họ và tên người nhận</label>
-                            <input type="text" name="fullName" th:value="${user.fullName}" required>
+                            <label>Họ và tên người nhận *</label>
+                            <input type="text" name="fullName" th:value="${user.fullName}" placeholder="Nhập họ và tên" required>
                         </div>
                         <div class="form-group">
-                            <label>Số điện thoại</label>
-                            <input type="text" name="phoneNumber" th:value="${user.phoneNumber}" required>
+                            <label>Số điện thoại *</label>
+                            <input type="text" name="phoneNumber" th:value="${user.phoneNumber}" placeholder="Nhập số điện thoại" required>
                         </div>
                         <div class="form-group">
-                            <label>Địa chỉ nhận hàng</label>
-                            <input type="text" name="address" th:value="${user.address}" required>
+                            <label>Địa chỉ nhận hàng *</label>
+                            <input type="text" name="address" th:value="${user.address}" placeholder="Nhập địa chỉ giao hàng" required>
                         </div>
                     </div>
 
@@ -57,7 +45,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-checkout" style="margin-top: 30px;">XÁC NHẬN ĐẶT HÀNG</button>
+                    <button type="submit" class="btn-checkout" style="margin-top: 30px; width: 100%; padding: 15px; background: var(--primary-red); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">XÁC NHẬN ĐẶT HÀNG</button>
                 </form>
             </div>
 
@@ -74,5 +62,6 @@
             </aside>
         </div>
     </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
 </body>
 </html>

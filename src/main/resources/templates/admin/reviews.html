@@ -12,6 +12,7 @@
                     <th>Đánh giá</th>
                     <th>Bình luận</th>
                     <th>Ngày</th>
+                    <th>Trạng thái</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
@@ -25,10 +26,20 @@
                     <td th:text="${r.comment}">Comment</td>
                     <td th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy')}">Date</td>
                     <td>
-                        <form th:action="@{/admin/reviews/delete}" method="post">
-                            <input type="hidden" name="reviewId" th:value="${r.id}">
-                            <button type="submit" class="btn-action" style="background: var(--primary-red); color: white;">Xóa</button>
-                        </form>
+                        <span th:if="${r.approved}" style="color: green; font-weight: bold;">Đã duyệt</span>
+                        <span th:if="${!r.approved}" style="color: #f39c12; font-weight: bold;">Chờ duyệt</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <form th:if="${!r.approved}" th:action="@{/admin/reviews/approve}" method="post">
+                                <input type="hidden" name="reviewId" th:value="${r.id}">
+                                <button type="submit" class="btn-action" style="background: #27ae60; color: white;">Duyệt</button>
+                            </form>
+                            <form th:action="@{/admin/reviews/delete}" method="post">
+                                <input type="hidden" name="reviewId" th:value="${r.id}">
+                                <button type="submit" class="btn-action" style="background: var(--primary-red); color: white;" onclick="return confirm('Xác nhận xóa đánh giá này?')">Xóa</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             </tbody>

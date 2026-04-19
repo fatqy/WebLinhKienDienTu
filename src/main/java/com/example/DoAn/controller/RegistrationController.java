@@ -25,6 +25,10 @@ public class RegistrationController {
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserDto userDto, BindingResult result, Model model) {
+        if (!userDto.getPassword().equals(userDto.getConfirmPassword())) {
+            result.rejectValue("confirmPassword", "error.user", "Mật khẩu xác nhận không khớp");
+        }
+        
         if (result.hasErrors()) {
             return "register";
         }

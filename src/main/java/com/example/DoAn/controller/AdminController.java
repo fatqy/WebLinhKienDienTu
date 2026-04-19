@@ -34,7 +34,10 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
         model.addAttribute("revenue", adminService.calculateTotalRevenue());
+        model.addAttribute("monthlyRevenue", adminService.calculateRevenueByMonth(now.getMonthValue(), now.getYear()));
+        model.addAttribute("dailyRevenue", adminService.calculateRevenueByDay(now));
         model.addAttribute("newOrdersCount", adminService.countNewOrders());
         model.addAttribute("customerCount", adminService.countTotalCustomers());
         model.addAttribute("recentOrders", adminService.getRecentOrders());
@@ -54,6 +57,30 @@ public class AdminController {
         return "redirect:/admin/categories";
     }
 
+    @PostMapping("/categories/edit")
+    public String editCategory(@RequestParam Long id, @RequestParam String name) {
+        Category category = categoryRepository.findById(id).orElseThrow();
+        category.setName(name);
+        categoryRepository.save(category);
+        return "redirect:/admin/categories";
+    }
+
+    @GetMapping("/categories/delete/{id}")
+    @org.springframework.transaction.annotation.Transactional
+    public String deleteCategory(@PathVariable Long id) {
+        Category category = categoryRepository.findById(id).orElseThrow();
+        
+        // Tìm tất cả sản phẩm thuộc danh mục này và gỡ bỏ liên kết
+        List<Product> products = productRepository.findByCategoryName(category.getName());
+        for (Product p : products) {
+            p.setCategory(null);
+            productRepository.save(p);
+        }
+        
+        categoryRepository.delete(category);
+        return "redirect:/admin/categories";
+    }
+
     // --- QUẢN LÝ SẢN PHẨM ---
     @GetMapping("/products")
     public String listProducts(Model model) {
@@ -66,6 +93,23 @@ public class AdminController {
     public String addProduct(@ModelAttribute Product product, @RequestParam Long categoryId) {
         product.setCategory(categoryRepository.findById(categoryId).get());
         productRepository.save(product);
+        return "redirect:/admin/products";
+    }
+
+    @PostMapping("/products/edit")
+    public String editProduct(@ModelAttribute Product product, @RequestParam Long categoryId) {
+        Product existingProduct = productRepository.findById(product.getId()).orElseThrow();
+        existingProduct.setName(product.getName());
+        existingProduct.setOriginalPrice(product.getOriginalPrice());
+        existingProduct.setSalePrice(product.getSalePrice());
+        existingProduct.setStock(product.getStock());
+        existingProduct.setImageUrl(product.getImageUrl());
+        existingProduct.setExtraImages(product.getExtraImages());
+        existingProduct.setBadge(product.getBadge());
+        existingProduct.setBrand(product.getBrand());
+        existingProduct.setCategory(categoryRepository.findById(categoryId).get());
+        
+        productRepository.save(existingProduct);
         return "redirect:/admin/products";
     }
 
@@ -115,6 +159,14 @@ public class AdminController {
     @PostMapping("/reviews/delete")
     public String deleteReview(@RequestParam Long reviewId) {
         reviewRepository.deleteById(reviewId);
+        return "redirect:/admin/reviews";
+    }
+
+    @PostMapping("/reviews/approve")
+    public String approveReview(@RequestParam Long reviewId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow();
+        review.setApproved(true);
+        reviewRepository.save(review);
         return "redirect:/admin/reviews";
     }
 }

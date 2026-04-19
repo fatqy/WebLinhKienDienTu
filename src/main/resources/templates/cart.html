@@ -59,9 +59,10 @@
                         <td th:text="${item.product.getFormattedCurrentPrice()}">Price</td>
                         <td>
                             <input type="number" th:value="${item.quantity}" min="1" th:max="${item.product.stock}" 
+                                   th:onchange="'updateQuantity(' + ${item.id} + ', this.value)'"
                                    style="width: 50px; padding: 5px; border: 1px solid #ddd;">
                         </td>
-                        <td th:text="${#numbers.formatDecimal((item.product.salePrice > 0 ? item.product.salePrice : item.product.originalPrice) * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫'}" 
+                        <td th:id="'item-total-' + ${item.id}" th:text="${#numbers.formatDecimal((item.product.salePrice > 0 ? item.product.salePrice : item.product.originalPrice) * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫'}" 
                             style="font-weight: bold; color: var(--primary-red);">Total</td>
                         <td>
                             <a th:href="@{/cart/remove/{id}(id=${item.id})}" class="btn-remove">
@@ -75,7 +76,7 @@
             <div class="cart-summary">
                 <div class="summary-row">
                     <span>Tổng cộng:</span>
-                    <span class="total-price" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">Total</span>
+                    <span class="total-price" id="cart-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">Total</span>
                 </div>
                 <a href="/checkout" class="btn-checkout" style="display: block; text-align: center; text-decoration: none;">TIẾN HÀNH THANH TOÁN</a>
                 <div style="text-align: center; margin-top: 15px;">
@@ -84,6 +85,25 @@
             </div>
         </div>
     </main>
+
+    <script>
+        function updateQuantity(id, quantity) {
+            if (quantity < 1) return;
+            
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('quantity', quantity);
+            
+            fetch('/cart/update', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    location.reload(); // Đơn giản nhất là reload để Spring tính lại total, hoặc có thể tính bằng JS
+                }
+            });
+        }
+    </script>
 
     <footer class="footer" style="margin-top: 50px;">
         <div class="container" style="text-align: center;">&copy; 2026 GEARVN CLONE</div>

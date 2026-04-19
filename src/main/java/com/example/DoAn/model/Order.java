@@ -60,4 +60,16 @@ public class Order {
     public String getFormattedTotalAmount() {
         return String.format("%,.0f₫", totalAmount);
     }
+
+    public String getStatusDisplay() {
+        if (status == null) return "Chờ duyệt";
+        return switch (status) {
+            case "PENDING" -> "Chờ duyệt";
+            case "CONFIRMED" -> "Đã xác nhận";
+            case "SHIPPING" -> "Đang giao";
+            case "COMPLETED" -> "Đã giao";
+            case "CANCELLED" -> "Đã hủy";
+            default -> status;
+        };
+    }
 }

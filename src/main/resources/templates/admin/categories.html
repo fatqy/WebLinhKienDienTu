@@ -25,11 +25,45 @@
                     <td th:text="${c.name}" style="font-weight: bold;">Category Name</td>
                     <td th:text="${c.products != null ? c.products.size() : 0}">0</td>
                     <td>
-                        <button class="btn-action" style="background: #f39c12; color: white;">Sửa</button>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn-action" style="background: #f39c12; color: white;" 
+                                    th:data-id="${c.id}"
+                                    th:data-name="${c.name}"
+                                    onclick="prepareEditCategory(this)">Sửa</button>
+                            <a th:href="@{/admin/categories/delete/{id}(id=${c.id})}" class="btn-action" 
+                               style="background: var(--primary-red); color: white;" 
+                               onclick="return confirm('Xác nhận xóa danh mục này? Tất cả sản phẩm thuộc danh mục sẽ bị ngắt kết nối.')">Xóa</a>
+                        </div>
                     </td>
                 </tr>
             </tbody>
         </table>
+
+        <!-- Edit Category Modal -->
+        <div id="editModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+            <div style="background: white; width: 400px; margin: 100px auto; padding: 30px; border-radius: 8px;">
+                <h3>Sửa danh mục</h3>
+                <form th:action="@{/admin/categories/edit}" method="post" style="margin-top: 20px;">
+                    <input type="hidden" id="editCategoryId" name="id">
+                    <div class="form-group">
+                        <label>Tên danh mục</label>
+                        <input type="text" id="editCategoryName" name="name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button type="submit" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px;">CẬP NHẬT</button>
+                        <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="btn-action" style="background: #95a5a6; color: white; padding: 10px 20px;">HỦY</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function prepareEditCategory(btn) {
+                document.getElementById('editCategoryId').value = btn.getAttribute('data-id');
+                document.getElementById('editCategoryName').value = btn.getAttribute('data-name');
+                document.getElementById('editModal').style.display = 'block';
+            }
+        </script>
     </div>
 </body>
 </html>

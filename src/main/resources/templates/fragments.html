@@ -29,8 +29,13 @@
                     <div sec:authorize="isAnonymous()" class="action-item">
                         <a href="/login"><i class="fas fa-user"></i> <span>Đăng nhập</span></a>
                     </div>
-                    <div sec:authorize="isAuthenticated()" class="action-item">
-                        <a href="/order-history"><i class="fas fa-user-check"></i> <span sec:authentication="name">User</span></a>
+                    <div sec:authorize="isAuthenticated()" class="action-item dropdown">
+                        <a href="#"><i class="fas fa-user-check"></i> <span sec:authentication="name">User</span></a>
+                        <div class="dropdown-content" style="right: 0; left: auto;">
+                            <a href="/profile"><i class="fas fa-id-card"></i> Hồ sơ cá nhân</a>
+                            <a href="/order-history"><i class="fas fa-history"></i> Lịch sử đơn hàng</a>
+                            <a href="/logout" style="color: var(--primary-red); border-top: 1px solid #eee;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                        </div>
                     </div>
                     <div class="action-item">
                         <a href="/cart"><i class="fas fa-shopping-cart"></i> <span>Giỏ hàng</span></a>

@@ -22,15 +22,29 @@
                         <a href="/linh-kien-may-tinh" style="font-size: 13px; color: blue; border-top: 1px solid #eee; display: block; margin-top: 10px; padding-top: 10px;">Tất cả sản phẩm</a>
                     </div>
                 </div>
-                <!-- Có thể thêm các filter cứng khác ở đây -->
                 <div class="filter-group">
                     <div class="filter-title">Khoảng giá</div>
                     <div class="filter-options">
-                        <label class="filter-item"><input type="checkbox"> <span>Dưới 1 triệu</span></label>
-                        <label class="filter-item"><input type="checkbox"> <span>1 triệu - 5 triệu</span></label>
-                        <label class="filter-item"><input type="checkbox"> <span>Trên 10 triệu</span></label>
+                        <a href="/linh-kien-may-tinh?maxPrice=1000000" class="filter-link" th:style="${maxPrice == 1000000 ? 'color: var(--primary-red);' : ''}">Dưới 1 triệu</a>
+                        <a href="/linh-kien-may-tinh?minPrice=1000000&maxPrice=5000000" class="filter-link" th:style="${minPrice == 1000000 ? 'color: var(--primary-red);' : ''}">1 triệu - 5 triệu</a>
+                        <a href="/linh-kien-may-tinh?minPrice=5000000&maxPrice=10000000" class="filter-link" th:style="${minPrice == 5000000 ? 'color: var(--primary-red);' : ''}">5 triệu - 10 triệu</a>
+                        <a href="/linh-kien-may-tinh?minPrice=10000000&maxPrice=20000000" class="filter-link" th:style="${minPrice == 10000000 ? 'color: var(--primary-red);' : ''}">10 triệu - 20 triệu</a>
+                        <a href="/linh-kien-may-tinh?minPrice=20000000" class="filter-link" th:style="${minPrice == 20000000 ? 'color: var(--primary-red);' : ''}">Trên 20 triệu</a>
                     </div>
                 </div>
+
+                <div class="filter-group">
+                    <div class="filter-title">Thương hiệu</div>
+                    <div class="filter-options">
+                        <a href="/linh-kien-may-tinh?brand=ASUS" class="filter-link" th:style="${currentBrand == 'ASUS' ? 'color: var(--primary-red);' : ''}">ASUS</a>
+                        <a href="/linh-kien-may-tinh?brand=MSI" class="filter-link" th:style="${currentBrand == 'MSI' ? 'color: var(--primary-red);' : ''}">MSI</a>
+                        <a href="/linh-kien-may-tinh?brand=Intel" class="filter-link" th:style="${currentBrand == 'Intel' ? 'color: var(--primary-red);' : ''}">Intel</a>
+                        <a href="/linh-kien-may-tinh?brand=AMD" class="filter-link" th:style="${currentBrand == 'AMD' ? 'color: var(--primary-red);' : ''}">AMD</a>
+                        <a href="/linh-kien-may-tinh?brand=Corsair" class="filter-link" th:style="${currentBrand == 'Corsair' ? 'color: var(--primary-red);' : ''}">Corsair</a>
+                    </div>
+                </div>
+
+                <a href="/linh-kien-may-tinh" style="font-size: 13px; color: blue; border-top: 1px solid #eee; display: block; margin-top: 10px; padding-top: 10px;">Xóa tất cả bộ lọc</a>
             </aside>
 
             <!-- Product Area -->

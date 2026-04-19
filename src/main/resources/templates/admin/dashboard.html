@@ -5,15 +5,23 @@
         <h2 style="margin-bottom: 25px;">BẢNG ĐIỀU KHIỂN</h2>
         
         <div class="card-stats">
+            <div class="stat-item" style="border-left-color: #27ae60;">
+                <h4>Doanh thu hôm nay</h4>
+                <p th:text="${#numbers.formatDecimal(dailyRevenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
+            </div>
+            <div class="stat-item" style="border-left-color: #2980b9;">
+                <h4>Doanh thu tháng này</h4>
+                <p th:text="${#numbers.formatDecimal(monthlyRevenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
+            </div>
             <div class="stat-item">
                 <h4>Tổng doanh thu</h4>
                 <p th:text="${#numbers.formatDecimal(revenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
             </div>
-            <div class="stat-item">
-                <h4>Đơn hàng mới</h4>
+            <div class="stat-item" style="border-left-color: #f39c12;">
+                <h4>Đơn hàng chờ duyệt</h4>
                 <p th:text="${newOrdersCount}">0</p>
             </div>
-            <div class="stat-item">
+            <div class="stat-item" style="border-left-color: #8e44ad;">
                 <h4>Khách hàng</h4>
                 <p th:text="${customerCount}">0</p>
             </div>

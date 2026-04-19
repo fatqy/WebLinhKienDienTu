@@ -29,6 +29,22 @@ public class AdminService {
                 .sum();
     }
 
+    public double calculateRevenueByMonth(int month, int year) {
+        return orderRepository.findAll().stream()
+                .filter(order -> !"CANCELLED".equals(order.getStatus()))
+                .filter(order -> order.getOrderDate().getMonthValue() == month && order.getOrderDate().getYear() == year)
+                .mapToDouble(Order::getTotalAmount)
+                .sum();
+    }
+
+    public double calculateRevenueByDay(LocalDateTime date) {
+        return orderRepository.findAll().stream()
+                .filter(order -> !"CANCELLED".equals(order.getStatus()))
+                .filter(order -> order.getOrderDate().toLocalDate().equals(date.toLocalDate()))
+                .mapToDouble(Order::getTotalAmount)
+                .sum();
+    }
+
     public long countNewOrders() {
         return orderRepository.findAll().stream()
                 .filter(order -> "PENDING".equals(order.getStatus()))

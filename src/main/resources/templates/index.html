@@ -82,6 +82,28 @@
                 </form>
             </div>
         </div>
+
+        <!-- Sản phẩm mới nhất -->
+        <div class="section-title">
+            <h3>SẢN PHẨM MỚI NHẤT <span class="sale-badge" style="background: green;">New</span></h3>
+            <a href="/linh-kien-may-tinh" style="color: blue;">Xem tất cả</a>
+        </div>
+        <div class="product-grid">
+            <div th:each="product : ${newProducts}" class="product-card">
+                <div class="product-badge" th:if="${not #strings.isEmpty(product.badge)}" th:text="${product.badge}">New</div>
+                <img th:src="${product.imageUrl}" class="product-image">
+                <div class="product-title" th:text="${product.name}">Product Name</div>
+                <div class="product-price">
+                    <span class="current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
+                    <span class="original-price" th:if="${product.salePrice > 0}" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
+                </div>
+                <form th:action="@{/cart/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="add-to-cart">THÊM GIỎ HÀNG</button>
+                </form>
+            </div>
+        </div>
     </main>
 
     <footer th:replace="~{fragments :: footer}"></footer>

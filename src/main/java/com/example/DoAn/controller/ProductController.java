@@ -40,8 +40,28 @@ public class ProductController {
     }
 
     @GetMapping("/linh-kien-may-tinh")
-    public String getCollectionPage(Model model) {
-        model.addAttribute("products", productRepository.findAll());
+    public String getCollectionPage(Model model,
+                                   @RequestParam(required = false) String brand,
+                                   @RequestParam(required = false) Double minPrice,
+                                   @RequestParam(required = false) Double maxPrice) {
+        List<Product> products = productRepository.findAll();
+        
+        if (brand != null && !brand.isEmpty()) {
+            products.removeIf(p -> p.getBrand() == null || !p.getBrand().equalsIgnoreCase(brand));
+            model.addAttribute("currentBrand", brand);
+        }
+        
+        if (minPrice != null) {
+            products.removeIf(p -> (p.getSalePrice() > 0 ? p.getSalePrice() : p.getOriginalPrice()) < minPrice);
+            model.addAttribute("minPrice", minPrice);
+        }
+        
+        if (maxPrice != null) {
+            products.removeIf(p -> (p.getSalePrice() > 0 ? p.getSalePrice() : p.getOriginalPrice()) > maxPrice);
+            model.addAttribute("maxPrice", maxPrice);
+        }
+
+        model.addAttribute("products", products);
         return "linh-kien-may-tinh";
     }
 

@@ -39,4 +39,11 @@ public class CartController {
         cartService.removeFromCart(id);
         return "redirect:/cart";
     }
+
+    @PostMapping("/update")
+    @ResponseBody
+    public String updateCart(@RequestParam Long id, @RequestParam int quantity) {
+        cartService.updateQuantity(id, quantity);
+        return "success";
+    }
 }

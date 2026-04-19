@@ -58,7 +58,46 @@
 
         <div class="product-description">
             <h2 style="border-bottom: 2px solid var(--primary-red); display: inline-block; padding-bottom: 5px; margin-bottom: 20px;">MÔ TẢ CHI TIẾT</h2>
-            <div th:text="${product.description}">Mô tả đang được cập nhật...</div>
+            <div th:text="${product.description != null ? product.description : 'Mô tả đang được cập nhật...'}">Mô tả...</div>
+        </div>
+
+        <!-- Đánh giá sản phẩm -->
+        <div class="reviews-section" style="margin-top: 50px; background: #fff; padding: 25px; border-radius: 8px;">
+            <h3 style="margin-bottom: 25px;">ĐÁNH GIÁ TỪ NGƯỜI MUA TRƯỚC</h3>
+            <div th:if="${#lists.isEmpty(product.reviews)}" style="color: #666; font-style: italic;">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên!</div>
+            
+            <div th:each="review : ${product.reviews}" th:if="${review.approved}" style="border-bottom: 1px solid #eee; padding: 15px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <strong th:text="${review.user.fullName}">Tên người dùng</strong>
+                    <span style="color: #ff9800;">
+                        <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                           th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                    </span>
+                </div>
+                <div style="font-size: 12px; color: #999; margin-bottom: 10px;" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">01/01/2026</div>
+                <div th:text="${review.comment}">Nội dung đánh giá...</div>
+            </div>
+            
+            <!-- Nút để mở form đánh giá (prototype có thể chỉ là form đơn giản) -->
+            <div style="margin-top: 30px;">
+                <a href="/login" th:if="${#authentication == null or #authentication.principal == 'anonymousUser'}" 
+                   style="color: var(--primary-red); font-weight: bold;">Đăng nhập để gửi đánh giá</a>
+                <form th:if="${#authentication != null and #authentication.principal != 'anonymousUser'}" action="/product/review" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 500;">Đánh giá của bạn *</label>
+                        <select name="rating" style="padding: 10px; border: 1px solid #ddd; width: 100%; border-radius: 4px;">
+                            <option value="5">★★★★★ - Rất tốt</option>
+                            <option value="4">★★★★☆ - Tốt</option>
+                            <option value="3">★★★☆☆ - Bình thường</option>
+                            <option value="2">★★☆☆☆ - Kém</option>
+                            <option value="1">★☆☆☆☆ - Rất kém</option>
+                        </select>
+                    </div>
+                    <textarea name="comment" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm này (chất lượng, đóng gói, giao hàng...)"></textarea>
+                    <button type="submit" class="btn-buy-now" style="width: auto; margin-top: 10px; padding: 10px 30px;">GỬI ĐÁNH GIÁ</button>
+                </form>
+            </div>
         </div>
     </main>
 

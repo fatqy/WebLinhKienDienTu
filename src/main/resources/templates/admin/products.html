@@ -20,48 +20,78 @@
             </thead>
             <tbody>
                 <tr th:each="p : ${products}">
-                    <td><img th:src="${p.imageUrl}" style="width: 50px;"></td>
+                    <td><img th:src="${p.imageUrl}" style="width: 50px; height: 50px; object-fit: contain; background: white; border: 1px solid #eee;"></td>
                     <td th:text="${p.name}">Name</td>
-                    <td th:text="${p.category.name}">Category</td>
+                    <td th:text="${p.category != null ? p.category.name : 'N/A'}">Category</td>
                     <td th:text="${p.getFormattedSalePrice()}">0₫</td>
                     <td th:text="${p.stock}" th:style="${p.stock <= 5 ? 'color: red; font-weight: bold;' : ''}">0</td>
                     <td>
-                        <a th:href="@{/admin/products/delete/{id}(id=${p.id})}" class="btn-action" style="background: var(--primary-red); color: white;" onclick="return confirm('Xác nhận xóa?')">Xóa</a>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn-action" style="background: #f39c12; color: white;" 
+                                    th:attr="data-id=${p.id},
+                                            data-catid=${p.category != null ? p.category.id : 0},
+                                            data-name=${p.name},
+                                            data-op=${p.originalPrice},
+                                            data-sp=${p.salePrice},
+                                            data-stock=${p.stock},
+                                            data-img=${p.imageUrl},
+                                            data-extra=${p.extraImages},
+                                            data-badge=${p.badge},
+                                            data-brand=${p.brand}"
+                                    onclick="prepareEditModal(this)">Sửa</button>
+                            <a th:href="@{/admin/products/delete/{id}(id=${p.id})}" class="btn-action" style="background: var(--primary-red); color: white;" onclick="return confirm('Xác nhận xóa?')">Xóa</a>
+                        </div>
                     </td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- Simple Add Modal -->
+        <!-- Modal Thêm -->
         <div id="addModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
-            <div style="background: white; width: 500px; margin: 50px auto; padding: 30px; border-radius: 8px;">
+            <div style="background: white; width: 600px; margin: 30px auto; padding: 30px; border-radius: 8px; max-height: 90vh; overflow-y: auto;">
                 <h3>Thêm sản phẩm mới</h3>
                 <form th:action="@{/admin/products/add}" method="post" style="margin-top: 20px;">
                     <div class="form-group">
                         <label>Tên sản phẩm</label>
-                        <input type="text" name="name" required style="width: 100%; padding: 8px;">
+                        <input type="text" name="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div class="form-group">
                         <label>Danh mục</label>
-                        <select name="categoryId" style="width: 100%; padding: 8px;">
+                        <select name="categoryId" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                             <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Giá gốc</label>
-                        <input type="number" name="originalPrice" required style="width: 100%; padding: 8px;">
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Giá gốc</label>
+                            <input type="number" name="originalPrice" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Giá khuyến mãi</label>
+                            <input type="number" name="salePrice" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Số lượng tồn kho</label>
+                            <input type="number" name="stock" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Thương hiệu</label>
+                            <input type="text" name="brand" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Giá khuyến mãi</label>
-                        <input type="number" name="salePrice" style="width: 100%; padding: 8px;">
+                        <label>Nhãn (Badge)</label>
+                        <input type="text" name="badge" placeholder="Hot, New..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div class="form-group">
-                        <label>Số lượng tồn kho</label>
-                        <input type="number" name="stock" required style="width: 100%; padding: 8px;">
+                        <label>Link ảnh chính</label>
+                        <input type="text" name="imageUrl" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div class="form-group">
-                        <label>Link ảnh (URL)</label>
-                        <input type="text" name="imageUrl" required style="width: 100%; padding: 8px;">
+                        <label>Link ảnh phụ</label>
+                        <input type="text" name="extraImages" placeholder="Link 1, Link 2..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
                         <button type="submit" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px;">LƯU LẠI</button>
@@ -70,6 +100,85 @@
                 </form>
             </div>
         </div>
+
+        <!-- Modal Sửa -->
+        <div id="editModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+            <div style="background: white; width: 600px; margin: 30px auto; padding: 30px; border-radius: 8px; max-height: 90vh; overflow-y: auto;">
+                <h3>Sửa sản phẩm</h3>
+                <form th:action="@{/admin/products/edit}" method="post" style="margin-top: 20px;">
+                    <input type="hidden" id="editProductId" name="id">
+                    <div class="form-group">
+                        <label>Tên sản phẩm</label>
+                        <input type="text" id="editName" name="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Danh mục</label>
+                        <select id="editCategoryId" name="categoryId" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Giá gốc</label>
+                            <input type="number" id="editOriginalPrice" name="originalPrice" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Giá khuyến mãi</label>
+                            <input type="number" id="editSalePrice" name="salePrice" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Số lượng tồn kho</label>
+                            <input type="number" id="editStock" name="stock" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Thương hiệu</label>
+                            <input type="text" id="editBrand" name="brand" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nhãn (Badge)</label>
+                        <input type="text" id="editBadge" name="badge" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Link ảnh chính</label>
+                        <input type="text" id="editImageUrl" name="imageUrl" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Link ảnh phụ</label>
+                        <input type="text" id="editExtraImages" name="extraImages" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button type="submit" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px;">CẬP NHẬT</button>
+                        <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="btn-action" style="background: #95a5a6; color: white; padding: 10px 20px;">HỦY</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function prepareEditModal(btn) {
+                document.getElementById('editProductId').value = btn.getAttribute('data-id');
+                document.getElementById('editCategoryId').value = btn.getAttribute('data-catid');
+                document.getElementById('editName').value = btn.getAttribute('data-name');
+                document.getElementById('editOriginalPrice').value = btn.getAttribute('data-op');
+                document.getElementById('editSalePrice').value = btn.getAttribute('data-sp');
+                document.getElementById('editStock').value = btn.getAttribute('data-stock');
+                document.getElementById('editImageUrl').value = btn.getAttribute('data-img');
+                
+                let extra = btn.getAttribute('data-extra');
+                document.getElementById('editExtraImages').value = (extra === 'null' || !extra) ? '' : extra;
+                
+                let badge = btn.getAttribute('data-badge');
+                document.getElementById('editBadge').value = (badge === 'null' || !badge) ? '' : badge;
+                
+                let brand = btn.getAttribute('data-brand');
+                document.getElementById('editBrand').value = (brand === 'null' || !brand) ? '' : brand;
+                
+                document.getElementById('editModal').style.display = 'block';
+            }
+        </script>
     </div>
 </body>
 </html>

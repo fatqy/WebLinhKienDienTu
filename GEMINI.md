@@ -30,6 +30,7 @@ Sử dụng Maven Wrapper (`mvnw`) đi kèm cho tất cả các tác vụ phát 
 `http://localhost:8080/linh-kien-may-tinh`
 
 ## Quy ước phát triển
+*   **Ngôn ngữ giao tiếp:** Luôn luôn giao tiếp và phản hồi bằng **tiếng Việt**.
 *   **Phong cách lập trình:** Tuân thủ các quy ước tiêu chuẩn của Java và Spring Boot.
 *   **Dữ liệu mẫu:** Phiên bản hiện tại sử dụng dữ liệu giả (mock data) được tạo trực tiếp trong controller để phục vụ mục đích trình diễn và kiểm tra bố cục.
 *   **Định dạng (Styling):** Ưu tiên sử dụng **Vanilla CSS** thay vì các framework tiện ích như Tailwind để có khả năng kiểm soát tối đa và hiệu năng nhẹ. Sử dụng biến CSS trong `:root` để đảm bảo tính nhất quán của thương hiệu.

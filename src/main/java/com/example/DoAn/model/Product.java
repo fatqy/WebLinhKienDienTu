@@ -21,8 +21,11 @@ public class Product {
     
     private int stock; // Số lượng tồn kho
     private String imageUrl;
+    @Column(length = 2000)
+    private String extraImages; // Danh sách URL ảnh phụ, cách nhau bởi dấu phẩy
     private String badge; // Ví dụ: Hot Deal, New
     private String status; // Ví dụ: Còn hàng, Hết hàng
+    private String brand; // Thương hiệu
 
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -59,10 +62,14 @@ public class Product {
     public void setStock(int stock) { this.stock = stock; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getExtraImages() { return extraImages; }
+    public void setExtraImages(String extraImages) { this.extraImages = extraImages; }
     public String getBadge() { return badge; }
     public void setBadge(String badge) { this.badge = badge; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
     public List<Review> getReviews() { return reviews; }
