@@ -14,6 +14,7 @@ public class Category {
     private String name;
 
     @OneToMany(mappedBy = "category")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Product> products;
 
     public Category() {}

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: ai_search_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  redis:
+    image: redis:alpine
+    container_name: ai_search_redis
+    ports:
+      - "6379:6379"
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: ai_search_meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=aSampleMasterKey
+      - MEILI_ENV=development
+    volumes:
+      - meilisearch_data:/meili_data
+
+volumes:
+  mongodb_data:
+  meilisearch_data:

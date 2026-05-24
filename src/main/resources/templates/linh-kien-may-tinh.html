@@ -22,25 +22,47 @@
                         <a href="/linh-kien-may-tinh" style="font-size: 13px; color: blue; border-top: 1px solid #eee; display: block; margin-top: 10px; padding-top: 10px;">Tất cả sản phẩm</a>
                     </div>
                 </div>
+
+                <!-- Bộ lọc giá thông minh -->
                 <div class="filter-group">
-                    <div class="filter-title">Khoảng giá</div>
+                    <div class="filter-title">Khoảng giá tự chọn</div>
                     <div class="filter-options">
-                        <a href="/linh-kien-may-tinh?maxPrice=1000000" class="filter-link" th:style="${maxPrice == 1000000 ? 'color: var(--primary-red);' : ''}">Dưới 1 triệu</a>
-                        <a href="/linh-kien-may-tinh?minPrice=1000000&maxPrice=5000000" class="filter-link" th:style="${minPrice == 1000000 ? 'color: var(--primary-red);' : ''}">1 triệu - 5 triệu</a>
-                        <a href="/linh-kien-may-tinh?minPrice=5000000&maxPrice=10000000" class="filter-link" th:style="${minPrice == 5000000 ? 'color: var(--primary-red);' : ''}">5 triệu - 10 triệu</a>
-                        <a href="/linh-kien-may-tinh?minPrice=10000000&maxPrice=20000000" class="filter-link" th:style="${minPrice == 10000000 ? 'color: var(--primary-red);' : ''}">10 triệu - 20 triệu</a>
-                        <a href="/linh-kien-may-tinh?minPrice=20000000" class="filter-link" th:style="${minPrice == 20000000 ? 'color: var(--primary-red);' : ''}">Trên 20 triệu</a>
+                        <form th:action="${searchQuery != null ? '/search' : (categoryId != null ? '/category/'+categoryId : '/linh-kien-may-tinh')}" method="get" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Giữ lại từ khóa tìm kiếm nếu có -->
+                            <input type="hidden" name="q" th:if="${searchQuery}" th:value="${searchQuery}">
+                            <!-- Giữ lại thương hiệu đang chọn nếu có -->
+                            <input type="hidden" name="brand" th:if="${currentBrand}" th:value="${currentBrand}">
+                            
+                            <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Giá từ" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; width: 100%;">
+                            <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="đến giá" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; width: 100%;">
+                            <button type="submit" class="btn-action" style="background: var(--primary-red); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">ÁP DỤNG BỘ LỌC</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Các link lọc giá nhanh -->
+                <div class="filter-group">
+                    <div class="filter-title">Lọc nhanh</div>
+                    <div class="filter-options">
+                        <th:block th:with="baseUrl=${searchQuery != null ? '/search?q='+searchQuery : (categoryId != null ? '/category/'+categoryId+'?' : '/linh-kien-may-tinh?')}, sep=${searchQuery != null ? '&' : ''}">
+                            <a th:href="${baseUrl} + ${sep} + 'maxPrice=1000000'" class="filter-link" th:style="${maxPrice == 1000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">Dưới 1 triệu</a>
+                            <a th:href="${baseUrl} + ${sep} + 'minPrice=1000000&maxPrice=5000000'" class="filter-link" th:style="${minPrice == 1000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">1 - 5 triệu</a>
+                            <a th:href="${baseUrl} + ${sep} + 'minPrice=5000000&maxPrice=10000000'" class="filter-link" th:style="${minPrice == 5000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">5 - 10 triệu</a>
+                            <a th:href="${baseUrl} + ${sep} + 'minPrice=10000000&maxPrice=20000000'" class="filter-link" th:style="${minPrice == 10000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">10 - 20 triệu</a>
+                            <a th:href="${baseUrl} + ${sep} + 'minPrice=20000000'" class="filter-link" th:style="${minPrice == 20000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">Trên 20 triệu</a>
+                        </th:block>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <div class="filter-title">Thương hiệu</div>
                     <div class="filter-options">
-                        <a href="/linh-kien-may-tinh?brand=ASUS" class="filter-link" th:style="${currentBrand == 'ASUS' ? 'color: var(--primary-red);' : ''}">ASUS</a>
-                        <a href="/linh-kien-may-tinh?brand=MSI" class="filter-link" th:style="${currentBrand == 'MSI' ? 'color: var(--primary-red);' : ''}">MSI</a>
-                        <a href="/linh-kien-may-tinh?brand=Intel" class="filter-link" th:style="${currentBrand == 'Intel' ? 'color: var(--primary-red);' : ''}">Intel</a>
-                        <a href="/linh-kien-may-tinh?brand=AMD" class="filter-link" th:style="${currentBrand == 'AMD' ? 'color: var(--primary-red);' : ''}">AMD</a>
-                        <a href="/linh-kien-may-tinh?brand=Corsair" class="filter-link" th:style="${currentBrand == 'Corsair' ? 'color: var(--primary-red);' : ''}">Corsair</a>
+                        <th:block th:with="baseUrl=${searchQuery != null ? '/search?q='+searchQuery : (categoryId != null ? '/category/'+categoryId+'?' : '/linh-kien-may-tinh?')}, sep=${searchQuery != null ? '&' : ''}">
+                            <a th:href="${baseUrl} + ${sep} + 'brand=ASUS'" class="filter-link" th:style="${currentBrand == 'ASUS' ? 'color: var(--primary-red); font-weight: bold;' : ''}">ASUS</a>
+                            <a th:href="${baseUrl} + ${sep} + 'brand=MSI'" class="filter-link" th:style="${currentBrand == 'MSI' ? 'color: var(--primary-red); font-weight: bold;' : ''}">MSI</a>
+                            <a th:href="${baseUrl} + ${sep} + 'brand=Intel'" class="filter-link" th:style="${currentBrand == 'Intel' ? 'color: var(--primary-red); font-weight: bold;' : ''}">Intel</a>
+                            <a th:href="${baseUrl} + ${sep} + 'brand=AMD'" class="filter-link" th:style="${currentBrand == 'AMD' ? 'color: var(--primary-red); font-weight: bold;' : ''}">AMD</a>
+                        </th:block>
                     </div>
                 </div>
 
@@ -49,20 +71,24 @@
 
             <!-- Product Area -->
             <section class="product-area">
+                <!-- Thanh tìm kiếm nội bộ trang danh mục -->
+                <div class="search-box-inline" style="margin-bottom: 20px;">
+                    <form action="/search" method="get" style="display: flex; gap: 10px;">
+                        <input type="text" name="q" th:value="${searchQuery}" placeholder="Tìm kiếm trong danh mục này..." style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="hidden" name="categoryId" th:value="${categoryId}" th:if="${categoryId}">
+                        <button type="submit" class="btn-action" style="background: var(--primary-red); color: white; border: none; padding: 0 25px; border-radius: 4px; cursor: pointer;">TÌM KIẾM</button>
+                    </form>
+                </div>
+
                 <div class="sorting-bar">
-                    <div style="font-weight: bold; font-size: 18px;">Linh kiện máy tính</div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span>Sắp xếp:</span>
-                        <select style="padding: 5px; border: 1px solid var(--border-color); border-radius: 4px;">
-                            <option>Mới nhất</option>
-                            <option>Giá thấp đến cao</option>
-                            <option>Giá cao đến thấp</option>
-                            <option>Bán chạy nhất</option>
-                        </select>
+                    <div style="font-weight: bold; font-size: 18px;">
+                        <span th:if="${searchQuery}" th:text="'Kết quả tìm kiếm cho: ' + ${searchQuery}">Tìm kiếm</span>
+                        <span th:unless="${searchQuery}" th:text="${currentCategory ?: 'Tất cả sản phẩm'}">Linh kiện máy tính</span>
                     </div>
                 </div>
 
-                <div class="product-grid">
+                <!-- Hiển thị khi có sản phẩm -->
+                <div class="product-grid" th:if="${not #lists.isEmpty(products)}">
                     <div th:each="product : ${products}" class="product-card">
                         <div class="product-badge" th:if="${not #strings.isEmpty(product.badge)}" th:text="${product.badge}">Badge</div>
                         <div class="product-badge" style="visibility: hidden;" th:if="${#strings.isEmpty(product.badge)}">.</div>
@@ -73,6 +99,29 @@
                             <span class="original-price" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
                         </div>
                         <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                    </div>
+                </div>
+
+                <!-- Thông báo khi KHÔNG có sản phẩm nào phù hợp -->
+                <div th:if="${#lists.isEmpty(products)}" style="text-align: center; padding: 50px 20px; background: white; border-radius: 8px; margin: 20px 0; border: 1px dashed #ccc;">
+                    <i class="fas fa-search" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+                    <h3 style="color: #666;">Rất tiếc, không tìm thấy sản phẩm nào phù hợp!</h3>
+                    <p style="color: #888; font-size: 14px;">Bạn hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc giá nhé.</p>
+                    <a href="/linh-kien-may-tinh" class="btn-action" style="background: #3498db; color: white; text-decoration: none; padding: 10px 20px; display: inline-block; margin-top: 15px; border-radius: 4px;">XEM TẤT CẢ SẢN PHẨM</a>
+                </div>
+
+                <!-- Gợi ý sản phẩm -->
+                <div th:if="${not #lists.isEmpty(suggestedProducts)}" style="margin-top: 50px; border-top: 2px solid #eee; padding-top: 30px;">
+                    <h3 style="margin-bottom: 20px; color: #333;">CÓ THỂ BẠN CŨNG ĐANG TÌM</h3>
+                    <div class="product-grid">
+                        <div th:each="product : ${suggestedProducts}" class="product-card">
+                            <img th:src="${product.imageUrl}" th:alt="${product.name}" class="product-image">
+                            <div class="product-title" th:text="${product.name}">Product Name</div>
+                            <div class="product-price">
+                                <span class="current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
+                            </div>
+                            <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                        </div>
                     </div>
                 </div>
             </section>

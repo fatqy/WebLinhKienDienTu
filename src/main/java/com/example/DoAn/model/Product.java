@@ -20,6 +20,7 @@ public class Product {
     private double salePrice;
     
     private int stock; // Số lượng tồn kho
+    @Column(length = 1000)
     private String imageUrl;
     @Column(length = 2000)
     private String extraImages; // Danh sách URL ảnh phụ, cách nhau bởi dấu phẩy
@@ -32,6 +33,7 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Review> reviews;
 
     public Product() {}

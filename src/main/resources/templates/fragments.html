@@ -18,13 +18,65 @@
         </div>
         <div class="header-main">
             <div class="container" style="display: flex; align-items: center; width: 100%; gap: 30px;">
-                <div class="logo"><a href="/" style="color: var(--primary-red); text-decoration: none;">GEARVN</a></div>
-                <div class="search-bar">
+                <div class="logo">
+                    <a href="/">
+                        <img th:src="${imageAssets.logo}" alt="GEARVN" style="height: 35px; vertical-align: middle;">
+                    </a>
+                </div>
+                <div class="search-bar" style="position: relative;">
                     <form th:action="@{/search}" method="get" style="display: flex; width: 100%;">
-                        <input type="text" name="q" placeholder="Bạn cần tìm gì?" th:value="${searchQuery}">
+                        <input type="text" id="searchInput" name="q" placeholder="Bạn cần tìm gì?" th:value="${searchQuery}" autocomplete="off">
                         <button type="submit"><i class="fas fa-search"></i></button>
                     </form>
+                    <!-- Dropdown gợi ý sản phẩm -->
+                    <div id="suggestionBox" class="dropdown-content" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 0 0 8px 8px; border: 1px solid #eee; background: white;">
+                        <!-- Items will be loaded by JS -->
+                    </div>
                 </div>
+
+                <script>
+                    const searchInput = document.getElementById('searchInput');
+                    const suggestionBox = document.getElementById('suggestionBox');
+                    let debounceTimer;
+
+                    searchInput.addEventListener('input', function() {
+                        clearTimeout(debounceTimer);
+                        const query = this.value.trim();
+                        
+                        if (query.length < 2) {
+                            suggestionBox.style.display = 'none';
+                            return;
+                        }
+
+                        debounceTimer = setTimeout(() => {
+                            fetch(`/api/products/suggestions?q=${encodeURIComponent(query)}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.length > 0) {
+                                        suggestionBox.innerHTML = data.map(item => `
+                                            <a href="/product/${item.id}" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #f9f9f9; text-decoration: none; color: #333;">
+                                                <img src="${item.imageUrl}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                <div style="flex-grow: 1;">
+                                                    <div style="font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">${item.name}</div>
+                                                    <div style="color: var(--primary-red); font-size: 12px; font-weight: bold;">${new Intl.NumberFormat('vi-VN').format(item.salePrice > 0 ? item.salePrice : item.originalPrice)}₫</div>
+                                                </div>
+                                            </a>
+                                        `).join('');
+                                        suggestionBox.style.display = 'block';
+                                    } else {
+                                        suggestionBox.style.display = 'none';
+                                    }
+                                });
+                        }, 300); // Đợi 300ms sau khi ngừng gõ mới gọi API để tiết kiệm tài nguyên
+                    });
+
+                    // Đóng dropdown khi click ra ngoài
+                    document.addEventListener('click', function(e) {
+                        if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target)) {
+                            suggestionBox.style.display = 'none';
+                        }
+                    });
+                </script>
                 <div class="header-actions">
                     <div sec:authorize="isAnonymous()" class="action-item">
                         <a href="/login"><i class="fas fa-user"></i> <span>Đăng nhập</span></a>

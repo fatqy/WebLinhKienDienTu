@@ -121,8 +121,35 @@ public class AdminController {
 
     // --- QUẢN LÝ ĐƠN HÀNG ---
     @GetMapping("/orders")
-    public String listOrders(Model model) {
-        model.addAttribute("orders", orderRepository.findAll());
+    public String listOrders(Model model,
+                             @RequestParam(required = false) String keyword,
+                             @RequestParam(required = false) String startDate,
+                             @RequestParam(required = false) String endDate) {
+        List<Order> orders = orderRepository.findAll();
+
+        // Lọc theo từ khóa (tên khách hàng hoặc số điện thoại)
+        if (keyword != null && !keyword.isEmpty()) {
+            orders.removeIf(o -> (o.getFullName() == null || !o.getFullName().toLowerCase().contains(keyword.toLowerCase())) &&
+                                 (o.getPhoneNumber() == null || !o.getPhoneNumber().contains(keyword)));
+            model.addAttribute("keyword", keyword);
+        }
+
+        // Lọc theo ngày (giả định định dạng yyyy-MM-dd)
+        if (startDate != null && !startDate.isEmpty()) {
+            java.time.LocalDateTime start = java.time.LocalDate.parse(startDate).atStartOfDay();
+            orders.removeIf(o -> o.getOrderDate().isBefore(start));
+            model.addAttribute("startDate", startDate);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            java.time.LocalDateTime end = java.time.LocalDate.parse(endDate).atTime(23, 59, 59);
+            orders.removeIf(o -> o.getOrderDate().isAfter(end));
+            model.addAttribute("endDate", endDate);
+        }
+
+        // Đảo ngược danh sách để đơn hàng mới nhất lên đầu
+        java.util.Collections.reverse(orders);
+
+        model.addAttribute("orders", orders);
         return "admin/orders";
     }
 

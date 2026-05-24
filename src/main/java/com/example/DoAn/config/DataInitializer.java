@@ -36,6 +36,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        System.out.println("--- ĐANG KHỞI TẠO VÀ CẬP NHẬT DỮ LIỆU SẢN PHẨM ---");
         // 1. Khởi tạo Role
         if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
             roleRepository.save(new Role("ROLE_ADMIN"));
@@ -70,71 +71,74 @@ public class DataInitializer implements CommandLineRunner {
         Category laptop = categoryRepository.findByName("Laptop").orElseGet(() -> categoryRepository.save(new Category("Laptop")));
         Category gamingGear = categoryRepository.findByName("Góc Gaming").orElseGet(() -> categoryRepository.save(new Category("Góc Gaming")));
 
-        // 4. Khởi tạo Sản phẩm (Thêm ít nhất 30 sản phẩm tổng cộng)
-        if (productRepository.count() < 10) {
-            // --- PC GVN ---
-            saveP("PC GVN Phantom Plus i4070Ti", 45990000, 42990000, 5, "gaming,pc,desktop", "PC Bán Chạy", pcGvn, "GEARVN");
-            saveP("PC GVN G-STORM i4060", 22500000, 19900000, 10, "computer,case,rgb", "Giá Hời", pcGvn, "GEARVN");
+        // 4. Khởi tạo Sản phẩm (Luôn cập nhật để đồng bộ ImageAssets)
+        // --- PC GVN ---
+        saveP("PC GVN Phantom Plus i4070Ti", 45990000, 42990000, 5, "gaming,pc,desktop", "PC Bán Chạy", pcGvn, "GEARVN");
+        saveP("PC GVN G-STORM i4060", 22500000, 19900000, 10, "computer,case,rgb", "Giá Hời", pcGvn, "GEARVN");
 
-            // --- LAPTOP ---
-            saveP("Laptop Gaming ASUS ROG Strix G16", 38990000, 35500000, 7, "gaming,laptop,rog", "New 2024", laptop, "ASUS");
-            saveP("Laptop MSI Katana 15 B13V", 28500000, 26900000, 12, "laptop,msi,gaming", "Hot", laptop, "MSI");
-            saveP("Laptop Acer Predator Helios Neo 16", 35000000, 32900000, 5, "laptop,acer,predator", "", laptop, "Acer");
+        // --- LAPTOP ---
+        saveP("Laptop Gaming ASUS ROG Strix G16", 38990000, 35500000, 7, "gaming,laptop,rog", "New 2024", laptop, "ASUS");
+        saveP("Laptop MSI Katana 15 B13V", 28500000, 26900000, 12, "laptop,msi,gaming", "Hot", laptop, "MSI");
+        saveP("Laptop Acer Predator Helios Neo 16", 35000000, 32900000, 5, "laptop,acer,predator", "", laptop, "Acer");
 
-            // --- GÓC GAMING ---
-            saveP("Ghế Gaming Corsair T3 Rush", 6500000, 5900000, 15, "gaming,chair", "Premium", gamingGear, "Corsair");
-            saveP("Bàn chữ Z Gaming Pro", 2500000, 1950000, 20, "gaming,desk", "", gamingGear, "GEARVN");
-            saveP("Đèn LED RGB dán bàn Smart Wi-Fi", 850000, 650000, 100, "rgb,led,strip", "Decor", gamingGear, "Smart");
+        // --- GÓC GAMING ---
+        saveP("Ghế Gaming Corsair T3 Rush", 6500000, 5900000, 15, "gaming,chair", "Premium", gamingGear, "Corsair");
+        saveP("Bàn chữ Z Gaming Pro", 2500000, 1950000, 20, "gaming,desk", "", gamingGear, "GEARVN");
+        saveP("Đèn LED RGB dán bàn Smart Wi-Fi", 850000, 650000, 100, "rgb,led,strip", "Decor", gamingGear, "Smart");
 
-            // --- VGA ---
-            saveP("ASUS ROG Strix GeForce RTX 4090 OC 24GB", 65990000, 59990000, 5, "nvidia,rtx,4090,vga", "Siêu phẩm", vga, "ASUS");
-            saveP("MSI GeForce RTX 4080 SUPER EXPERT 16G", 32990000, 30990000, 8, "msi,rtx,gpu", "New", vga, "MSI");
-            saveP("GIGABYTE RTX 4070 Ti SUPER GAMING OC", 25990000, 23500000, 12, "gigabyte,rtx,vga", "Hot Deal", vga, "GIGABYTE");
-            saveP("ASUS Dual GeForce RTX 4060 Ti 8GB", 12490000, 11290000, 20, "asus,dual,rtx", "", vga, "ASUS");
+        // --- VGA ---
+        saveP("ASUS ROG Strix GeForce RTX 4090 OC 24GB", 65990000, 59990000, 5, "nvidia,rtx,4090,vga", "Siêu phẩm", vga, "ASUS");
+        saveP("MSI GeForce RTX 4080 SUPER EXPERT 16G", 32990000, 30990000, 8, "msi,rtx,gpu", "New", vga, "MSI");
+        saveP("GIGABYTE RTX 4070 Ti SUPER GAMING OC", 25990000, 23500000, 12, "gigabyte,rtx,vga", "Hot Deal", vga, "GIGABYTE");
+        saveP("ASUS Dual GeForce RTX 4060 Ti 8GB", 12490000, 11290000, 20, "asus,dual,rtx", "", vga, "ASUS");
 
-            // --- CPU ---
-            saveP("Intel Core i9-14900K / 6.0GHz / 24 Nhân", 16490000, 15890000, 10, "intel,processor,i9", "Hot", cpu, "Intel");
-            saveP("AMD Ryzen 7 7800X3D / 5.0GHz / 8 Nhân", 11500000, 10200000, 15, "amd,ryzen,cpu", "Gaming", cpu, "AMD");
-            saveP("Intel Core i7-14700K / 5.6GHz / 20 Nhân", 11500000, 10890000, 20, "intel,i7,cpu", "", cpu, "Intel");
-            saveP("Intel Core i5-13400F / 4.6GHz / 10 Nhân", 5490000, 4990000, 30, "intel,i5,cpu", "Bán chạy", cpu, "Intel");
+        // --- CPU ---
+        saveP("Intel Core i9-14900K / 6.0GHz / 24 Nhân", 16490000, 15890000, 10, "intel,processor,i9", "Hot", cpu, "Intel");
+        saveP("AMD Ryzen 7 7800X3D / 5.0GHz / 8 Nhân", 11500000, 10200000, 15, "amd,ryzen,cpu", "Gaming", cpu, "AMD");
+        saveP("Intel Core i7-14700K / 5.6GHz / 20 Nhân", 11500000, 10890000, 20, "intel,i7,cpu", "", cpu, "Intel");
+        saveP("Intel Core i5-13400F / 4.6GHz / 10 Nhân", 5490000, 4990000, 30, "intel,i5,cpu", "Bán chạy", cpu, "Intel");
 
-            // --- MAINBOARD ---
-            saveP("ASUS ROG MAXIMUS Z790 HERO", 18990000, 17500000, 4, "asus,z790,motherboard", "High-end", main, "ASUS");
-            saveP("MSI MAG B760M MORTAR WIFI II", 4990000, 4590000, 25, "msi,b760,mainboard", "Bán chạy", main, "MSI");
-            saveP("GIGABYTE Z790 AORUS ELITE AX", 8500000, 7900000, 10, "gigabyte,aorus,motherboard", "", main, "GIGABYTE");
+        // --- MAINBOARD ---
+        saveP("ASUS ROG MAXIMUS Z790 HERO", 18990000, 17500000, 4, "asus,z790,motherboard", "High-end", main, "ASUS");
+        saveP("MSI MAG B760M MORTAR WIFI II", 4990000, 4590000, 25, "msi,b760,mainboard", "Bán chạy", main, "MSI");
+        saveP("GIGABYTE Z790 AORUS ELITE AX", 8500000, 7900000, 10, "gigabyte,aorus,motherboard", "", main, "GIGABYTE");
 
-            // --- RAM ---
-            saveP("Corsair Vengeance RGB 32GB (2x16GB) 6000MHz", 3590000, 3290000, 30, "corsair,vengeance,ram", "RGB", ram, "Corsair");
-            saveP("G.Skill Trident Z5 RGB 32GB 6400MHz", 4200000, 3850000, 15, "gskill,trident,ram", "Top", ram, "G.Skill");
-            saveP("Kingston FURY Beast 16GB 5600MHz", 1850000, 1650000, 50, "kingston,fury,ram", "", ram, "Kingston");
+        // --- RAM ---
+        saveP("Corsair Vengeance RGB 32GB (2x16GB) 6000MHz", 3590000, 3290000, 30, "corsair,vengeance,ram", "RGB", ram, "Corsair");
+        saveP("G.Skill Trident Z5 RGB 32GB 6400MHz", 4200000, 3850000, 15, "gskill,trident,ram", "Top", ram, "G.Skill");
+        saveP("Kingston FURY Beast 16GB 5600MHz", 1850000, 1650000, 50, "kingston,fury,ram", "", ram, "Kingston");
 
-            // --- SSD ---
-            saveP("Samsung 990 Pro 2TB M.2 NVMe PCIe 5.0", 5990000, 5490000, 10, "samsung,990,ssd", "Tốc độ cao", ssd, "Samsung");
-            saveP("WD Black SN850X 1TB M.2 NVMe", 2850000, 2490000, 40, "wd,black,ssd", "", ssd, "Western Digital");
-            saveP("Crucial T700 1TB PCIe Gen5", 4500000, 4100000, 5, "crucial,nvme,ssd", "New Gen", ssd, "Crucial");
+        // --- SSD ---
+        saveP("Samsung 990 Pro 2TB M.2 NVMe PCIe 5.0", 5990000, 5490000, 10, "samsung,990,ssd", "Tốc độ cao", ssd, "Samsung");
+        saveP("WD Black SN850X 1TB M.2 NVMe", 2850000, 2490000, 40, "wd,black,ssd", "", ssd, "Western Digital");
+        saveP("Crucial T700 1TB PCIe Gen5", 4500000, 4100000, 5, "crucial,nvme,ssd", "New Gen", ssd, "Crucial");
 
-            // --- PSU ---
-            saveP("Nguồn Corsair RM1000e - 80 Plus Gold", 4290000, 3950000, 15, "corsair,psu,power", "", psu, "Corsair");
-            saveP("ASUS ROG Thor 1200W Platinum II", 9500000, 8900000, 3, "asus,thor,psu", "OLED", psu, "ASUS");
+        // --- PSU ---
+        saveP("Nguồn Corsair RM1000e - 80 Plus Gold", 4290000, 3950000, 15, "corsair,psu,power", "", psu, "Corsair");
+        saveP("ASUS ROG Thor 1200W Platinum II", 9500000, 8900000, 3, "asus,thor,psu", "OLED", psu, "ASUS");
 
-            // --- COOLING ---
-            saveP("ASUS ROG RYUJIN III 360 ARGB", 10500000, 9800000, 5, "asus,ryujin,cooler", "LCD", cooling, "ASUS");
-            saveP("Deepcool AK620 Digital", 1850000, 1650000, 20, "deepcool,air,cooler", "Digital", cooling, "Deepcool");
+        // --- COOLING ---
+        saveP("ASUS ROG RYUJIN III 360 ARGB", 10500000, 9800000, 5, "asus,ryujin,cooler", "LCD", cooling, "ASUS");
+        saveP("Deepcool AK620 Digital", 1850000, 1650000, 20, "deepcool,air,cooler", "Digital", cooling, "Deepcool");
 
-            // --- CASE ---
-            saveP("Lian Li O11 Dynamic EVO RGB - White", 5500000, 4990000, 8, "lianli,case,pc", "Luxury", cases, "Lian Li");
-            saveP("NZXT H9 Flow White", 4500000, 4200000, 10, "nzxt,h9,case", "Best Airflow", cases, "NZXT");
-        }
+        // --- CASE ---
+        saveP("Lian Li O11 Dynamic EVO RGB - White", 5500000, 4990000, 8, "lianli,case,pc", "Luxury", cases, "Lian Li");
+        saveP("NZXT H9 Flow White", 4500000, 4200000, 10, "nzxt,h9,case", "Best Airflow", cases, "NZXT");
     }
 
     private void saveP(String name, double op, double sp, int st, String keywords, String badge, Category cat, String brand) {
-        Product p = new Product();
+        // Kiểm tra xem sản phẩm đã tồn tại chưa để cập nhật, tránh bị lưu cũ URL
+        Product p = productRepository.findByNameContainingIgnoreCase(name).stream()
+                .filter(product -> product.getName().equals(name))
+                .findFirst()
+                .orElse(new Product());
+                
         p.setName(name);
         p.setOriginalPrice(op);
         p.setSalePrice(sp);
         p.setStock(st);
-        // Kết hợp từ khóa tech và sản phẩm cụ thể để có ảnh sát nhất
-        p.setImageUrl("https://loremflickr.com/400/400/technology," + keywords + "/all?lock=" + Math.abs(name.hashCode() % 1000));
+        // Cập nhật URL mới nhất từ ImageAssets
+        p.setImageUrl(ImageAssets.getProductImage(name, keywords));
         p.setBadge(badge);
         p.setStatus("Còn hàng");
         p.setCategory(cat);
