@@ -41,6 +41,13 @@ public class AdminController {
         model.addAttribute("newOrdersCount", adminService.countNewOrders());
         model.addAttribute("customerCount", adminService.countTotalCustomers());
         model.addAttribute("recentOrders", adminService.getRecentOrders());
+        
+        // Cảnh báo sản phẩm sắp hết hàng (< 5)
+        List<Product> lowStockProducts = productRepository.findAll().stream()
+                .filter(p -> p.getStock() < 5)
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("lowStockProducts", lowStockProducts);
+        
         return "admin/dashboard";
     }
 

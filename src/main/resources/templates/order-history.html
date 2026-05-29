@@ -19,8 +19,15 @@
     <main class="container">
         <h2 style="margin: 30px 0;">Lịch sử đơn hàng của bạn</h2>
         
-        <div th:if="${param.success}" class="alert-error" style="background: #e8f5e9; color: #2e7d32; margin-bottom: 20px; padding: 15px; border-radius: 4px;">
-            Chúc mừng! Bạn đã đặt hàng thành công.
+        <div th:if="${success}" class="alert-success" style="background: #e8f5e9; color: #2e7d32; margin-bottom: 20px; padding: 15px; border-radius: 4px; border: 1px solid #c8e6c9;">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}">Thành công</span>
+        </div>
+        <div th:if="${error}" class="alert-error" style="background: #ffebee; color: #c62828; margin-bottom: 20px; padding: 15px; border-radius: 4px; border: 1px solid #ffcdd2;">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}">Lỗi</span>
+        </div>
+
+        <div th:if="${param.success}" class="alert-success" style="background: #e8f5e9; color: #2e7d32; margin-bottom: 20px; padding: 15px; border-radius: 4px; border: 1px solid #c8e6c9;">
+            <i class="fas fa-check-circle"></i> Chúc mừng! Bạn đã đặt hàng thành công.
         </div>
 
         <div th:if="${#lists.isEmpty(orders)}" style="text-align: center; padding: 50px;">
@@ -43,8 +50,18 @@
                         <span th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫'}">Price</span>
                     </li>
                 </ul>
-                <div style="text-align: right; margin-top: 15px; font-size: 18px; font-weight: bold;">
-                    Tổng tiền: <span style="color: var(--primary-red);" th:text="${order.getFormattedTotalAmount()}">Total</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <div>
+                        <!-- Nút hủy đơn (Chỉ hiện khi PENDING) -->
+                        <form th:if="${order.status == 'PENDING'}" th:action="@{/order/cancel/{id}(id=${order.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')">
+                            <button type="submit" class="btn-cancel" style="background: #fdf2f2; color: #c81e1e; border: 1px solid #f8d7da; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">
+                                <i class="fas fa-times-circle"></i> Hủy đơn hàng
+                            </button>
+                        </form>
+                    </div>
+                    <div style="font-size: 18px; font-weight: bold;">
+                        Tổng tiền: <span style="color: var(--primary-red);" th:text="${order.getFormattedTotalAmount()}">Total</span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -8,40 +8,76 @@
         <div class="container" style="display: flex; gap: 30px; padding-top: 30px;">
             <!-- Sidebar Filters -->
             <aside class="sidebar" style="width: 250px; flex-shrink: 0;">
-                <div class="filter-group" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                    <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Danh mục</div>
-                    <div class="filter-options">
-                        <div th:each="category : ${categories}" style="margin-bottom: 10px;">
-                            <a th:href="@{/category/{id}(id=${category.id})}" 
-                               th:text="${category.name}"
-                               th:style="${currentCategory == category.name ? 'color: var(--primary-blue); font-weight: bold;' : 'color: #ccc;'}"
-                               style="font-size: 14px; display: block; padding: 5px 0;">
-                               Category Name
-                            </a>
+                <form id="filterForm" th:action="${searchQuery != null ? '/search' : (categoryId != null ? '/category/'+categoryId : '/linh-kien-may-tinh')}" method="get">
+                    <input type="hidden" name="q" th:if="${searchQuery}" th:value="${searchQuery}">
+                    
+                    <div class="filter-group" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Danh mục</div>
+                        <div class="filter-options">
+                            <div th:each="category : ${categories}" style="margin-bottom: 10px;">
+                                <a th:href="@{/category/{id}(id=${category.id})}" 
+                                   th:text="${category.name}"
+                                   th:style="${currentCategory == category.name ? 'color: var(--primary-blue); font-weight: bold;' : 'color: #ccc;'}"
+                                   style="font-size: 14px; display: block; padding: 5px 0;">
+                                   Category Name
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Bộ lọc giá -->
-                <div class="filter-group" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                    <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Khoảng giá</div>
-                    <form th:action="${searchQuery != null ? '/search' : (categoryId != null ? '/category/'+categoryId : '/linh-kien-may-tinh')}" method="get" style="display: flex; flex-direction: column; gap: 8px;">
-                        <input type="hidden" name="q" th:if="${searchQuery}" th:value="${searchQuery}">
-                        <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Từ" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
-                        <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="Đến" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
-                        <button type="submit" style="background: var(--primary-blue); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">LỌC</button>
-                    </form>
-                </div>
+                    <!-- Lọc thương hiệu (Multi-select) -->
+                    <div class="filter-group" th:if="${not #lists.isEmpty(allBrands)}" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Thương hiệu</div>
+                        <div class="filter-options" style="max-height: 200px; overflow-y: auto;">
+                            <div th:each="brand : ${allBrands}" style="margin-bottom: 8px; display: flex; align-items: center; gap: 10px; color: #ccc; font-size: 14px;">
+                                <input type="checkbox" name="brands" th:value="${brand}" 
+                                       th:checked="${currentBrands != null && currentBrands.contains(brand)}"
+                                       onchange="document.getElementById('filterForm').submit()">
+                                <span th:text="${brand}">Brand</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bộ lọc giá -->
+                    <div class="filter-group" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Khoảng giá</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Từ" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
+                            <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="Đến" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
+                            <button type="submit" style="background: var(--primary-blue); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px;">LỌC GIÁ</button>
+                        </div>
+                    </div>
+
+                    <!-- Sắp xếp (Hidden input for form submit) -->
+                    <input type="hidden" name="sort" th:value="${currentSort}" id="hiddenSort">
+                </form>
             </aside>
 
             <!-- Product Area -->
             <section style="flex-grow: 1;">
-                <div class="sorting-bar" style="margin-bottom: 30px; color: #fff;">
-                    <h2 th:text="${currentCategory ?: 'Tất cả sản phẩm'}" style="font-size: 24px;">Linh kiện máy tính</h2>
+                <div class="sorting-bar" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; background: var(--item-bg); padding: 15px 25px; border-radius: 12px;">
+                    <h2 th:text="${currentCategory ?: 'Tất cả sản phẩm'}" style="font-size: 20px; color: #fff;">Linh kiện máy tính</h2>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px; color: #ccc; font-size: 14px;">
+                        <span>Sắp xếp:</span>
+                        <select onchange="document.getElementById('hiddenSort').value = this.value; document.getElementById('filterForm').submit()" 
+                                style="background: #333; color: #fff; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; outline: none;">
+                            <option value="">Mặc định</option>
+                            <option value="price-asc" th:selected="${currentSort == 'price-asc'}">Giá tăng dần</option>
+                            <option value="price-desc" th:selected="${currentSort == 'price-desc'}">Giá giảm dần</option>
+                            <option value="newest" th:selected="${currentSort == 'newest'}">Mới nhất</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="product-grid" th:if="${not #lists.isEmpty(products)}">
-                    <div th:each="product : ${products}" class="item">
+                    <div th:each="product : ${products}" class="item" style="position: relative;">
+                        <!-- Nút Xem nhanh -->
+                        <div class="quick-view-btn" th:onclick="'openQuickView(' + ${product.id} + ')'" 
+                             style="position: absolute; top: 10px; right: 10px; background: rgba(0,113,227,0.9); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; opacity: 0; transition: 0.3s;">
+                            <i class="fas fa-eye"></i>
+                        </div>
+
                         <a th:href="@{/product/{id}(id=${product.id})}">
                             <div class="img-slide">
                                 <img th:src="${product.imageUrl}" th:alt="${product.name}">
@@ -61,6 +97,79 @@
                         </div>
                     </div>
                 </div>
+
+                <style>
+                    .item:hover .quick-view-btn { opacity: 1 !important; transform: scale(1.1); }
+                    .modal-qv { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+                    .modal-qv-content { position: relative; background: #1a1a1a; margin: 10% auto; padding: 30px; border-radius: 20px; width: 800px; display: flex; gap: 30px; color: #fff; border: 1px solid #333; }
+                    .close-qv { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #888; }
+                    .close-qv:hover { color: #fff; }
+                </style>
+
+                <!-- Quick View Modal -->
+                <div id="quickViewModal" class="modal-qv">
+                    <div class="modal-qv-content">
+                        <span class="close-qv" onclick="closeQuickView()">&times;</span>
+                        <div style="flex: 1;">
+                            <img id="qv-img" src="" style="width: 100%; border-radius: 12px;">
+                        </div>
+                        <div style="flex: 1.2;">
+                            <h2 id="qv-name" style="font-size: 24px; margin-bottom: 15px;">Product Name</h2>
+                            <div style="margin-bottom: 20px;">
+                                <span id="qv-price" style="font-size: 22px; color: var(--primary-blue); font-weight: bold;">0₫</span>
+                                <strike id="qv-old-price" style="color: #888; margin-left: 15px; display: none;">0₫</strike>
+                            </div>
+                            <p id="qv-brand" style="color: #aaa; margin-bottom: 15px;">Thương hiệu: <span></span></p>
+                            <p style="color: #ccc; line-height: 1.6; margin-bottom: 25px;">Sản phẩm chính hãng, bảo hành 12 tháng. Miễn phí giao hàng toàn quốc.</p>
+                            
+                            <form th:action="@{/cart/add}" method="post">
+                                <input type="hidden" name="productId" id="qv-id">
+                                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px;">
+                                    <span style="color: #ccc;">Số lượng:</span>
+                                    <input type="number" name="quantity" value="1" min="1" style="width: 60px; padding: 8px; border-radius: 6px; background: #333; border: 1px solid #555; color: #fff;">
+                                </div>
+                                <button type="submit" class="btn-submit" style="background: var(--primary-blue); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">THÊM VÀO GIỎ HÀNG</button>
+                            </form>
+                            <a id="qv-link" href="#" style="display: block; text-align: center; margin-top: 15px; color: #888; font-size: 14px; text-decoration: underline;">Xem chi tiết đầy đủ</a>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function openQuickView(id) {
+                        fetch('/api/products/' + id)
+                            .then(res => res.json())
+                            .then(p => {
+                                document.getElementById('qv-img').src = p.imageUrl;
+                                document.getElementById('qv-name').textContent = p.name;
+                                document.getElementById('qv-id').value = p.id;
+                                document.getElementById('qv-link').href = '/product/' + p.id;
+                                document.getElementById('qv-brand').querySelector('span').textContent = p.brand || 'Khác';
+                                
+                                const currentPrice = p.salePrice > 0 ? p.salePrice : p.originalPrice;
+                                document.getElementById('qv-price').textContent = new Intl.NumberFormat('vi-VN').format(currentPrice) + '₫';
+                                
+                                if (p.salePrice > 0) {
+                                    document.getElementById('qv-old-price').style.display = 'inline';
+                                    document.getElementById('qv-old-price').textContent = new Intl.NumberFormat('vi-VN').format(p.originalPrice) + '₫';
+                                } else {
+                                    document.getElementById('qv-old-price').style.display = 'none';
+                                }
+                                
+                                document.getElementById('quickViewModal').style.display = 'block';
+                            });
+                    }
+
+                    function closeQuickView() {
+                        document.getElementById('quickViewModal').style.display = 'none';
+                    }
+
+                    window.onclick = function(event) {
+                        if (event.target == document.getElementById('quickViewModal')) {
+                            closeQuickView();
+                        }
+                    }
+                </script>
 
                 <div th:if="${#lists.isEmpty(products)}" style="text-align: center; padding: 50px; background: var(--item-bg); border-radius: 12px; color: #ccc;">
                     <p>Không tìm thấy sản phẩm nào phù hợp.</p>

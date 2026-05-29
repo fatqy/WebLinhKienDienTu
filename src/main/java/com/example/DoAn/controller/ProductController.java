@@ -51,35 +51,57 @@ public class ProductController {
 
     @GetMapping("/linh-kien-may-tinh")
     public String getCollectionPage(Model model,
-                                   @RequestParam(required = false) String brand,
+                                   @RequestParam(required = false) List<String> brands,
                                    @RequestParam(required = false) Double minPrice,
-                                   @RequestParam(required = false) Double maxPrice) {
+                                   @RequestParam(required = false) Double maxPrice,
+                                   @RequestParam(required = false) String sort) {
         List<Product> products = productRepository.findAll();
-        applyFilters(products, brand, minPrice, maxPrice);
+        
+        // Lấy danh sách thương hiệu duy nhất (trước khi lọc)
+        List<String> allBrands = products.stream()
+                .map(Product::getBrand)
+                .filter(b -> b != null && !b.isEmpty())
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("allBrands", allBrands);
+
+        applyFiltersAndSort(products, brands, minPrice, maxPrice, sort);
 
         model.addAttribute("products", products);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
-        model.addAttribute("currentBrand", brand);
+        model.addAttribute("currentBrands", brands);
+        model.addAttribute("currentSort", sort);
         addGlobalSuggestions(model);
         return "linh-kien-may-tinh";
     }
 
     @GetMapping("/category/{id}")
     public String getByCategory(@PathVariable Long id, Model model,
-                               @RequestParam(required = false) String brand,
+                               @RequestParam(required = false) List<String> brands,
                                @RequestParam(required = false) Double minPrice,
-                               @RequestParam(required = false) Double maxPrice) {
+                               @RequestParam(required = false) Double maxPrice,
+                               @RequestParam(required = false) String sort) {
         Category category = categoryRepository.findById(id).orElseThrow();
         List<Product> products = new ArrayList<>(category.getProducts());
-        applyFilters(products, brand, minPrice, maxPrice);
+        
+        // Lấy danh sách thương hiệu trong danh mục này
+        List<String> allBrands = products.stream()
+                .map(Product::getBrand)
+                .filter(b -> b != null && !b.isEmpty())
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("allBrands", allBrands);
+
+        applyFiltersAndSort(products, brands, minPrice, maxPrice, sort);
 
         model.addAttribute("products", products);
         model.addAttribute("currentCategory", category.getName());
         model.addAttribute("categoryId", id);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
-        model.addAttribute("currentBrand", brand);
+        model.addAttribute("currentBrands", brands);
+        model.addAttribute("currentSort", sort);
         addGlobalSuggestions(model);
         return "linh-kien-may-tinh";
     }
@@ -95,31 +117,32 @@ public class ProductController {
     @GetMapping("/search")
     public String search(@RequestParam String q, Model model,
                         @RequestParam(required = false) Long categoryId,
-                        @RequestParam(required = false) String brand,
+                        @RequestParam(required = false) List<String> brands,
                         @RequestParam(required = false) Double minPrice,
-                        @RequestParam(required = false) Double maxPrice) {
+                        @RequestParam(required = false) Double maxPrice,
+                        @RequestParam(required = false) String sort) {
         
         List<Product> results;
         if (categoryId != null) {
             // Tìm kiếm trong danh mục cụ thể
-            Category cat = categoryRepository.findById(categoryId).orElseThrow();
             results = productRepository.findByNameContainingIgnoreCase(q).stream()
                     .filter(p -> p.getCategory() != null && p.getCategory().getId().equals(categoryId))
                     .collect(java.util.stream.Collectors.toList());
-            model.addAttribute("currentCategory", cat.getName());
+            model.addAttribute("currentCategory", categoryRepository.findById(categoryId).get().getName());
             model.addAttribute("categoryId", categoryId);
         } else {
             // Tìm kiếm toàn hệ thống
             results = productRepository.findByNameContainingIgnoreCase(q);
         }
 
-        applyFilters(results, brand, minPrice, maxPrice);
+        applyFiltersAndSort(results, brands, minPrice, maxPrice, sort);
 
         model.addAttribute("products", results);
         model.addAttribute("searchQuery", q);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
-        model.addAttribute("currentBrand", brand);
+        model.addAttribute("currentBrands", brands);
+        model.addAttribute("currentSort", sort);
 
         // Gợi ý sản phẩm thông minh
         if (!results.isEmpty()) {
@@ -138,16 +161,40 @@ public class ProductController {
         return "linh-kien-may-tinh";
     }
 
-    // Helper: Áp dụng lọc sản phẩm tập trung
-    private void applyFilters(List<Product> products, String brand, Double minPrice, Double maxPrice) {
-        if (brand != null && !brand.isEmpty()) {
-            products.removeIf(p -> p.getBrand() == null || !p.getBrand().equalsIgnoreCase(brand));
+    // Helper: Áp dụng lọc sản phẩm và sắp xếp (Yêu cầu C.1 & C.2)
+    private void applyFiltersAndSort(List<Product> products, List<String> brands, Double minPrice, Double maxPrice, String sort) {
+        // Lọc thương hiệu (Đa điều kiện)
+        if (brands != null && !brands.isEmpty()) {
+            products.removeIf(p -> p.getBrand() == null || !brands.contains(p.getBrand()));
         }
+        
+        // Lọc giá
         if (minPrice != null) {
             products.removeIf(p -> (p.getSalePrice() > 0 ? p.getSalePrice() : p.getOriginalPrice()) < minPrice);
         }
         if (maxPrice != null) {
             products.removeIf(p -> (p.getSalePrice() > 0 ? p.getSalePrice() : p.getOriginalPrice()) > maxPrice);
+        }
+
+        // Sắp xếp (Yêu cầu C.2)
+        if (sort != null) {
+            switch (sort) {
+                case "price-asc":
+                    products.sort((p1, p2) -> Double.compare(
+                        p1.getSalePrice() > 0 ? p1.getSalePrice() : p1.getOriginalPrice(),
+                        p2.getSalePrice() > 0 ? p2.getSalePrice() : p2.getOriginalPrice()
+                    ));
+                    break;
+                case "price-desc":
+                    products.sort((p1, p2) -> Double.compare(
+                        p2.getSalePrice() > 0 ? p2.getSalePrice() : p2.getOriginalPrice(),
+                        p1.getSalePrice() > 0 ? p1.getSalePrice() : p1.getOriginalPrice()
+                    ));
+                    break;
+                case "newest":
+                    products.sort((p1, p2) -> p2.getId().compareTo(p1.getId()));
+                    break;
+            }
         }
     }
 
@@ -244,5 +291,11 @@ public class ProductController {
         userService.changeUserPassword(user, password);
         model.addAttribute("success", "Mật khẩu đã được thay đổi thành công. Vui lòng đăng nhập lại.");
         return "login";
+    }
+
+    @GetMapping("/api/products/{id}")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public Product getProductApi(@PathVariable Long id) {
+        return productRepository.findById(id).orElseThrow();
     }
 }

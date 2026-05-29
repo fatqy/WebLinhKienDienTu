@@ -4,6 +4,13 @@
     <div th:fragment="content">
         <h2 style="margin-bottom: 25px;">BẢNG ĐIỀU KHIỂN</h2>
         
+        <!-- Cảnh báo hết hàng -->
+        <div th:if="${not #lists.isEmpty(lowStockProducts)}" class="alert-low-stock" style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Cảnh báo:</strong> Có <span th:text="${#lists.size(lowStockProducts)}">0</span> sản phẩm sắp hết hàng (số lượng < 5).
+            <a href="/admin/products" style="color: #856404; text-decoration: underline; margin-left: 10px;">Xem ngay</a>
+        </div>
+
         <div class="card-stats">
             <div class="stat-item" style="border-left-color: #27ae60;">
                 <h4>Doanh thu hôm nay</h4>

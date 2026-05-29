@@ -48,6 +48,15 @@
                             </div>
                         </div>
 
+                        <div class="form-section" style="margin-top: 30px;">
+                            <h3>Mã giảm giá</h3>
+                            <div class="form-group" style="display: flex; gap: 10px;">
+                                <input type="text" name="couponCode" id="couponCode" placeholder="Nhập mã ưu đãi (nếu có)" style="flex: 1;">
+                                <button type="button" id="applyCoupon" style="background: #555; color: #fff; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer;">Áp dụng</button>
+                            </div>
+                            <div id="couponMessage" style="font-size: 13px; margin-top: 5px;"></div>
+                        </div>
+
                         <button type="submit" class="btn-submit">XÁC NHẬN ĐẶT HÀNG</button>
                     </form>
                 </div>
@@ -67,5 +76,33 @@
         </div>
     </main>
     <footer th:replace="~{fragments :: footer}"></footer>
+
+    <script th:inline="javascript">
+        const originalTotal = /*[[${total}]]*/ 0;
+        const btnApply = document.getElementById('applyCoupon');
+        const inputCoupon = document.getElementById('couponCode');
+        const msgCoupon = document.getElementById('couponMessage');
+        const displayTotal = document.querySelector('.total-row span:last-child');
+
+        btnApply.addEventListener('click', function() {
+            const code = inputCoupon.value.trim();
+            if (!code) return;
+
+            fetch(`/api/coupon/validate?code=${code}&subtotal=${originalTotal}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        msgCoupon.style.color = '#2ecc71';
+                        msgCoupon.textContent = data.message;
+                        const newTotal = originalTotal - data.discount;
+                        displayTotal.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + '₫';
+                    } else {
+                        msgCoupon.style.color = '#ff6b6b';
+                        msgCoupon.textContent = data.message;
+                        displayTotal.textContent = new Intl.NumberFormat('vi-VN').format(originalTotal) + '₫';
+                    }
+                });
+        });
+    </script>
 </body>
 </html>

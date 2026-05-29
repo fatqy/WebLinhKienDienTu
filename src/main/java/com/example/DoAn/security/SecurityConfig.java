@@ -40,6 +40,10 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/")
                 .permitAll()
             )
+            .rememberMe(rm -> rm
+                .key("uniqueAndSecret")
+                .tokenValiditySeconds(86400 * 7) // Lưu trong 7 ngày
+            )
             .exceptionHandling(ex -> ex
                 .accessDeniedPage("/403") // Khi User truy cập trang Admin
             )
