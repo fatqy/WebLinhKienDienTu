@@ -3,131 +3,166 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' – GEARVN.COM'">GEARVN</title>
+    <title th:text="${title} + ' – EWMI'"></title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <header th:fragment="header" class="header">
-        <div class="header-top">
-            <div class="container">
-                <a href="#"><i class="fas fa-phone"></i> Hotline 1900.5301</a>
-                <a href="#"><i class="fas fa-map-marker-alt"></i> Hệ thống Showroom</a>
+    <header th:fragment="header">
+        <div class="head">
+            <div class="logo-topzone">
+                <a href="/" class="ewmi-logo-container">
+                    <span class="ewmi-logo-text">EWMI</span>
+                    <span class="ewmi-dot"></span>
+                </a>
             </div>
-        </div>
-        <div class="header-main">
-            <div class="container" style="display: flex; align-items: center; width: 100%; gap: 30px;">
-                <div class="logo">
-                    <a href="/">
-                        <img th:src="${imageAssets.logo}" alt="GEARVN" style="height: 35px; vertical-align: middle;">
+            <ul class="menu">
+                <li th:each="catName : ${ {'PC GVN', 'Laptop', 'Góc Gaming', 'Màn hình'} }">
+                    <th:block th:each="cat : ${categories}" th:if="${cat.name == catName}">
+                        <a th:href="@{/category/{id}(id=${cat.id})}">
+                            <span th:text="${catName == 'PC GVN' ? 'Máy tính' : (catName == 'Góc Gaming' ? 'Gear' : catName)}">Category</span>
+                        </a>
+                    </th:block>
+                </li>
+                <li><a href="/linh-kien-may-tinh"><span>Phụ kiện</span></a></li>
+                <li><a href="/news"><span>TekZone</span></a></li>
+            </ul>
+            <div class="header-actions">
+                <div class="search-sp" onclick="document.querySelector('.form-search').classList.toggle('active')">
+                    <i class="fas fa-search" style="color: #fff; font-size: 18px;"></i>
+                </div>
+                <div class="action-item">
+                    <a href="/cart" class="cart">
+                        <i class="fas fa-shopping-cart" style="color: #fff; font-size: 18px;"></i>
                     </a>
                 </div>
-                <div class="search-bar" style="position: relative;">
-                    <form th:action="@{/search}" method="get" style="display: flex; width: 100%;">
-                        <input type="text" id="searchInput" name="q" placeholder="Bạn cần tìm gì?" th:value="${searchQuery}" autocomplete="off">
-                        <button type="submit"><i class="fas fa-search"></i></button>
-                    </form>
-                    <!-- Dropdown gợi ý sản phẩm -->
-                    <div id="suggestionBox" class="dropdown-content" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 0 0 8px 8px; border: 1px solid #eee; background: white;">
-                        <!-- Items will be loaded by JS -->
-                    </div>
+                <div sec:authorize="isAnonymous()" class="action-item">
+                    <a href="/login"><i class="fas fa-user"></i><span>Đăng nhập</span></a>
                 </div>
-
-                <script>
-                    const searchInput = document.getElementById('searchInput');
-                    const suggestionBox = document.getElementById('suggestionBox');
-                    let debounceTimer;
-
-                    searchInput.addEventListener('input', function() {
-                        clearTimeout(debounceTimer);
-                        const query = this.value.trim();
-                        
-                        if (query.length < 2) {
-                            suggestionBox.style.display = 'none';
-                            return;
-                        }
-
-                        debounceTimer = setTimeout(() => {
-                            fetch(`/api/products/suggestions?q=${encodeURIComponent(query)}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.length > 0) {
-                                        suggestionBox.innerHTML = data.map(item => `
-                                            <a href="/product/${item.id}" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #f9f9f9; text-decoration: none; color: #333;">
-                                                <img src="${item.imageUrl}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
-                                                <div style="flex-grow: 1;">
-                                                    <div style="font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">${item.name}</div>
-                                                    <div style="color: var(--primary-red); font-size: 12px; font-weight: bold;">${new Intl.NumberFormat('vi-VN').format(item.salePrice > 0 ? item.salePrice : item.originalPrice)}₫</div>
-                                                </div>
-                                            </a>
-                                        `).join('');
-                                        suggestionBox.style.display = 'block';
-                                    } else {
-                                        suggestionBox.style.display = 'none';
-                                    }
-                                });
-                        }, 300); // Đợi 300ms sau khi ngừng gõ mới gọi API để tiết kiệm tài nguyên
-                    });
-
-                    // Đóng dropdown khi click ra ngoài
-                    document.addEventListener('click', function(e) {
-                        if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target)) {
-                            suggestionBox.style.display = 'none';
-                        }
-                    });
-                </script>
-                <div class="header-actions">
-                    <div sec:authorize="isAnonymous()" class="action-item">
-                        <a href="/login"><i class="fas fa-user"></i> <span>Đăng nhập</span></a>
-                    </div>
-                    <div sec:authorize="isAuthenticated()" class="action-item dropdown">
-                        <a href="#"><i class="fas fa-user-check"></i> <span sec:authentication="name">User</span></a>
-                        <div class="dropdown-content" style="right: 0; left: auto;">
-                            <a href="/profile"><i class="fas fa-id-card"></i> Hồ sơ cá nhân</a>
-                            <a href="/order-history"><i class="fas fa-history"></i> Lịch sử đơn hàng</a>
-                            <a href="/logout" style="color: var(--primary-red); border-top: 1px solid #eee;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-                        </div>
-                    </div>
-                    <div class="action-item">
-                        <a href="/cart"><i class="fas fa-shopping-cart"></i> <span>Giỏ hàng</span></a>
-                    </div>
-                    <div sec:authorize="hasAuthority('ROLE_ADMIN')" class="action-item">
-                        <a href="/admin/dashboard" style="color: blue;"><i class="fas fa-user-shield"></i> <span>ADMIN</span></a>
+                <div sec:authorize="isAuthenticated()" class="action-item dropdown" onclick="this.querySelector('.dropdown-content').style.display = (this.querySelector('.dropdown-content').style.display === 'block') ? 'none' : 'block'">
+                    <a href="javascript:void(0)"><i class="fas fa-user-check"></i><span sec:authentication="name">User</span></a>
+                    <div class="dropdown-content">
+                        <a href="/profile"><i class="fas fa-id-card"></i> Hồ sơ</a>
+                        <a href="/order-history"><i class="fas fa-history"></i> Đơn hàng</a>
+                        <a sec:authorize="hasAuthority('ROLE_ADMIN')" href="/admin/dashboard" style="color: blue !important;"><i class="fas fa-user-shield"></i> Admin</a>
+                        <a href="/logout" style="color: red !important; border-top: 1px solid #eee;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                     </div>
                 </div>
             </div>
+
+            <!-- Integrated Search Form -->
+            <form class="form-search" th:action="@{/search}" method="get" style="display: none; position: absolute; top: 60px; left: 0; width: 100%; background: #1a1a1a; padding: 15px; z-index: 9999;">
+                <div class="click-search" style="max-width: 800px; margin: 0 auto; position: relative;">
+                    <input type="text" id="searchInput" name="q" placeholder="Bạn cần tìm gì?" th:value="${searchQuery}" autocomplete="off" style="width: 100%; padding: 12px 40px; border-radius: 8px; border: 1px solid #333; background: #2f3033; color: #fff;">
+                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; opacity: 0.5; color: #fff;"></i>
+                    <i class="fas fa-times" style="position: absolute; right: 12px; top: 12px; cursor: pointer; color: #fff;" onclick="document.getElementById('searchInput').value=''"></i>
+                </div>
+                <div id="suggestionBox" style="display: none; max-width: 800px; margin: 10px auto 0; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
+            </form>
+            
+            <script>
+                // Toggle Search Form
+                document.querySelector('.search-sp').addEventListener('click', function(e) {
+                    const form = document.querySelector('.form-search');
+                    if (form.style.display === 'none' || form.style.display === '') {
+                        form.style.display = 'block';
+                        document.getElementById('searchInput').focus();
+                    } else {
+                        form.style.display = 'none';
+                    }
+                });
+
+                // Search Logic
+                const searchInput = document.getElementById('searchInput');
+                const suggestionBox = document.getElementById('suggestionBox');
+                let debounceTimer;
+
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    const query = this.value.trim();
+                    if (query.length < 2) {
+                        suggestionBox.style.display = 'none';
+                        return;
+                    }
+                    debounceTimer = setTimeout(() => {
+                        fetch(`/api/products/suggestions?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.length > 0) {
+                                    suggestionBox.innerHTML = data.map(item => `
+                                        <a href="/product/${item.id}" style="display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333;">
+                                            <img src="${item.imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                                            <div style="flex-grow: 1;">
+                                                <div style="font-size: 14px; font-weight: 600;">${item.name}</div>
+                                                <div style="color: #0071e3; font-size: 13px; font-weight: bold;">${new Intl.NumberFormat('vi-VN').format(item.salePrice > 0 ? item.salePrice : item.originalPrice)}₫</div>
+                                            </div>
+                                        </a>
+                                    `).join('');
+                                    suggestionBox.style.display = 'block';
+                                } else {
+                                    suggestionBox.style.display = 'none';
+                                }
+                            });
+                    }, 300);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target) && !e.target.closest('.search-sp')) {
+                        suggestionBox.style.display = 'none';
+                        document.querySelector('.form-search').style.display = 'none';
+                    }
+                });
+            </script>
         </div>
-        <nav class="header-nav">
-            <div class="container">
-                <ul>
-                    <li class="dropdown">
-                        <i class="fas fa-bars"></i> <span>Danh mục sản phẩm</span>
-                        <div class="dropdown-content">
-                            <a th:each="cat : ${categories}" 
-                               th:href="@{/category/{id}(id=${cat.id})}" 
-                               th:text="${cat.name}">Category</a>
-                            <a href="/linh-kien-may-tinh" style="border-top: 1px solid #eee; font-weight: bold;">Tất cả sản phẩm</a>
-                        </div>
-                    </li>
-                    <li th:each="cat : ${categories}" th:if="${cat.name == 'PC GVN'}">
-                        <a th:href="@{/category/{id}(id=${cat.id})}">PC GVN</a>
-                    </li>
-                    <li th:each="cat : ${categories}" th:if="${cat.name == 'Laptop'}">
-                        <a th:href="@{/category/{id}(id=${cat.id})}">Laptop</a>
-                    </li>
-                    <li th:each="cat : ${categories}" th:if="${cat.name == 'Góc Gaming'}">
-                        <a th:href="@{/category/{id}(id=${cat.id})}">Góc Gaming</a>
-                    </li>
-                    <li><a href="/news">Tin tức</a></li>
-                </ul>
-            </div>
-        </nav>
     </header>
 
-    <footer th:fragment="footer" class="footer" style="margin-top: 50px;">
-        <div class="container" style="text-align: center;">
-            &copy; 2026 GEARVN CLONE - Laravel MySQL Laragon
+    <footer th:fragment="footer">
+        <div class="foot">
+            <div class="logo-foot">
+                <a href="/" class="ewmi-logo-container">
+                    <span class="ewmi-logo-text">EWMI</span>
+                    <span class="ewmi-dot"></span>
+                </a>
+            </div>
+            <ul class="list-foot">
+                <li>
+                    <span>Tổng đài</span>
+                    <a href="tel:1900969642"><span>Mua hàng:</span> <b>1900.9696.42</b></a>
+                    <a href="tel:1900969642"><span>Khiếu nại:</span> <b>1900.9868.43</b></a>
+                    <div class="footer-social" style="margin-top: 20px;">
+                        <p style="color: #888; font-size: 13px; margin-bottom: 10px;">Kết nối với chúng tôi</p>
+                        <a href="#" style="margin-right: 15px;"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" style="margin-right: 15px;"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-zalo"></i></a>
+                    </div>
+                </li>
+                <li>
+                    <span>Hệ thống cửa hàng</span>
+                    <a href="#">Xem 85 cửa hàng</a>
+                    <a href="#">Nội quy cửa hàng</a>
+                    <a href="#">Chất lượng phục vụ</a>
+                    <a href="#">Chính sách bảo hành & đổi trả</a>
+                </li>
+                <li>
+                    <span>Hỗ trợ khách hàng</span>
+                    <a href="#">Điều kiện giao dịch chung</a>
+                    <a href="#">Hướng dẫn mua hàng online</a>
+                    <a href="#">Chính sách giao hàng</a>
+                    <a href="#">Hướng dẫn thanh toán</a>
+                </li>
+                <li>
+                    <span>Về thương hiệu EWMI</span>
+                    <a href="#" class="blue">Tích điểm Quà tặng VIP</a>
+                    <a href="#">Giới thiệu EWMI</a>
+                    <a href="#">Bán hàng doanh nghiệp</a>
+                    <a href="#">Chính sách bảo mật</a>
+                </li>
+            </ul>
+            <div class="text-cpr">
+                <p>© 2026. Công Ty Cổ Phần EWMI Technology. All Rights Reserved.</p>
+                <p>Địa chỉ: 128 Trần Quang Khải, P.Tân Định, TP. Hồ Chí Minh.</p>
+            </div>
         </div>
     </footer>
 

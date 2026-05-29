@@ -10,13 +10,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.DoAn.model.User;
+import com.example.DoAn.model.PasswordResetToken;
+import com.example.DoAn.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.UUID;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Controller
 public class ProductController {
@@ -173,5 +182,67 @@ public class ProductController {
     @GetMapping("/403")
     public String accessDenied() {
         return "403";
+    }
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(@RequestParam String email, Model model, HttpServletRequest request) {
+        Optional<User> userOptional = userService.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            String token = UUID.randomUUID().toString();
+            userService.createPasswordResetTokenForUser(user, token);
+
+            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+            String resetUrl = baseUrl + "/reset-password?token=" + token;
+
+            String content = "Chào " + user.getFullName() + ",\n\n"
+                    + "Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng nhấn vào đường dẫn dưới đây để thực hiện:\n"
+                    + resetUrl + "\n\n"
+                    + "Đường dẫn này sẽ hết hạn sau 60 phút.\n"
+                    + "Nếu bạn không yêu cầu, vui lòng bỏ qua email này.";
+
+            try {
+                userService.sendEmail(email, "Yêu cầu khôi phục mật khẩu - WebLinhKien", content);
+                model.addAttribute("success", "Một liên kết đặt lại mật khẩu đã được gửi đến email của bạn.");
+            } catch (Exception e) {
+                model.addAttribute("error", "Có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.");
+            }
+        } else {
+            model.addAttribute("error", "Email không tồn tại trong hệ thống.");
+        }
+        return "forgot-password";
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordForm(@RequestParam String token, Model model) {
+        Optional<PasswordResetToken> tokenOptional = userService.getPasswordResetToken(token);
+        if (tokenOptional.isEmpty() || tokenOptional.get().isExpired()) {
+            model.addAttribute("error", "Liên kết không hợp lệ hoặc đã hết hạn.");
+            return "forgot-password";
+        }
+        model.addAttribute("token", token);
+        return "reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String processResetPassword(@RequestParam String token, @RequestParam String password, Model model) {
+        Optional<PasswordResetToken> tokenOptional = userService.getPasswordResetToken(token);
+        if (tokenOptional.isEmpty() || tokenOptional.get().isExpired()) {
+            model.addAttribute("error", "Liên kết không hợp lệ hoặc đã hết hạn.");
+            return "forgot-password";
+        }
+
+        User user = tokenOptional.get().getUser();
+        userService.changeUserPassword(user, password);
+        model.addAttribute("success", "Mật khẩu đã được thay đổi thành công. Vui lòng đăng nhập lại.");
+        return "login";
     }
 }

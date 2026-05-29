@@ -2,101 +2,85 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head(${product.name})}"></head>
 <style>
-    .product-detail-container { display: flex; gap: 40px; background: white; padding: 30px; border-radius: 8px; margin-top: 20px; }
-    .product-detail-image { flex: 1; text-align: center; }
-    .product-detail-image img { max-width: 100%; height: auto; border: 1px solid #eee; }
+    .product-detail-container { display: flex; gap: 40px; background: var(--item-bg); padding: 30px; border-radius: 24px; margin-top: 20px; color: #fff; }
+    .product-detail-image { flex: 1; text-align: center; background: #fff; border-radius: 12px; padding: 20px; }
+    .product-detail-image img { max-width: 100%; height: auto; transition: 0.3s; }
     .product-detail-info { flex: 1.5; }
-    .product-detail-info h1 { font-size: 24px; margin-bottom: 15px; }
-    .price-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
-    .detail-current-price { color: var(--primary-red); font-size: 28px; font-weight: bold; }
-    .detail-original-price { color: #999; text-decoration: line-through; margin-left: 15px; font-size: 18px; }
-    .stock-status { margin-bottom: 20px; font-weight: 500; }
-    .quantity-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
-    .quantity-selector input { width: 60px; padding: 8px; text-align: center; border: 1px solid var(--border-color); }
-    .btn-buy-now { background: var(--primary-red); color: white; border: none; padding: 15px 40px; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
-    .btn-buy-now:hover { background: #c10015; }
-    .product-description { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; }
+    .product-detail-info h1 { font-size: 28px; margin-bottom: 20px; font-weight: bold; }
+    .price-box { background: #444; padding: 25px; border-radius: 12px; margin: 25px 0; }
+    .detail-current-price { color: #fff; font-size: 32px; font-weight: bold; }
+    .detail-original-price { color: #aaa; text-decoration: line-through; margin-left: 15px; font-size: 20px; }
+    .stock-status { margin-bottom: 20px; font-weight: 500; font-size: 16px; }
+    .quantity-selector { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .quantity-selector input { width: 70px; padding: 10px; text-align: center; border: 1px solid #555; background: #333; color: #fff; border-radius: 8px; }
+    .btn-buy-now { background: var(--primary-blue); color: white; border: none; padding: 18px 40px; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+    .btn-buy-now:hover { opacity: 0.9; transform: scale(1.02); }
+    .product-description { margin-top: 50px; padding: 30px; background: var(--item-bg); border-radius: 24px; color: #fff; }
+    .product-description h2 { border-left: 4px solid var(--primary-blue); padding-left: 15px; margin-bottom: 25px; font-size: 22px; }
+    .breadcrumb { margin: 20px 0; font-size: 14px; color: #aaa; }
+    .breadcrumb a { color: var(--primary-blue); }
+    .reviews-section { margin-top: 50px; background: var(--item-bg); padding: 30px; border-radius: 24px; color: #fff; }
 </style>
 <body>
     <header th:replace="~{fragments :: header}"></header>
 
-    <main class="container">
-        <nav style="margin: 20px 0; font-size: 14px; color: #666;">
-            <a href="/">Trang chủ</a> / 
-            <a th:href="@{/category/{id}(id=${product.category.id})}" th:text="${product.category.name}">Category</a> / 
-            <span th:text="${product.name}">Product</span>
-        </nav>
+    <main class="main">
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="/">Trang chủ</a> / 
+                <a th:href="@{/category/{id}(id=${product.category.id})}" th:text="${product.category.name}">Category</a> / 
+                <span th:text="${product.name}">Product</span>
+            </nav>
 
-        <div class="product-detail-container">
-            <div class="product-detail-image">
-                <img th:src="${product.imageUrl}" th:alt="${product.name}">
-            </div>
-            <div class="product-detail-info">
-                <h1 th:text="${product.name}">Product Name</h1>
-                <div class="stock-status">
-                    Tình trạng: <span th:style="${product.stock > 0 ? 'color: green;' : 'color: red;'}" 
-                                      th:text="${product.stock > 0 ? 'Còn hàng (' + product.stock + ')' : 'Hết hàng'}">Còn hàng</span>
+            <div class="product-detail-container">
+                <div class="product-detail-image">
+                    <img th:src="${product.imageUrl}" th:alt="${product.name}">
                 </div>
+                <div class="product-detail-info">
+                    <h1 th:text="${product.name}">Product Name</h1>
+                    <div class="stock-status">
+                        Tình trạng: <span th:style="${product.stock > 0 ? 'color: #2ecc71;' : 'color: #e74c3c;'}" 
+                                          th:text="${product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}">Còn hàng</span>
+                    </div>
+                    
+                    <div class="price-box">
+                        <span class="detail-current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
+                        <span class="detail-original-price" th:if="${product.salePrice > 0}" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
+                    </div>
+
+                    <form th:action="@{/cart/add}" method="post">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <div class="quantity-selector">
+                            <span>Số lượng:</span>
+                            <input type="number" name="quantity" value="1" min="1" th:max="${product.stock}">
+                        </div>
+                        <button type="submit" class="btn-buy-now" th:disabled="${product.stock <= 0}">
+                            <i class="fas fa-shopping-cart"></i> THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="product-description">
+                <h2>Mô tả sản phẩm</h2>
+                <div th:utext="${product.description != null ? product.description : 'Thông tin đang được cập nhật...'}" style="line-height: 1.8; color: #ccc;">Mô tả...</div>
+            </div>
+
+            <!-- Đánh giá -->
+            <div class="reviews-section">
+                <h3 style="margin-bottom: 25px; font-size: 22px;">Đánh giá khách hàng</h3>
+                <div th:if="${#lists.isEmpty(product.reviews)}" style="color: #888; font-style: italic;">Chưa có đánh giá nào.</div>
                 
-                <div class="price-box">
-                    <span class="detail-current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
-                    <span class="detail-original-price" th:if="${product.salePrice > 0}" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
-                </div>
-
-                <form th:action="@{/cart/add}" method="post">
-                    <input type="hidden" name="productId" th:value="${product.id}">
-                    <div class="quantity-selector">
-                        <span>Số lượng:</span>
-                        <input type="number" name="quantity" value="1" min="1" th:max="${product.stock}">
+                <div th:each="review : ${product.reviews}" th:if="${review.approved}" style="border-bottom: 1px solid #444; padding: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <strong th:text="${review.user.fullName}" style="color: #fff;">Tên người dùng</strong>
+                        <span style="color: var(--primary-orange);">
+                            <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                               th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                        </span>
                     </div>
-                    <button type="submit" class="btn-buy-now" th:disabled="${product.stock <= 0}">
-                        <i class="fas fa-shopping-cart"></i> THÊM VÀO GIỎ HÀNG
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div class="product-description">
-            <h2 style="border-bottom: 2px solid var(--primary-red); display: inline-block; padding-bottom: 5px; margin-bottom: 20px;">MÔ TẢ CHI TIẾT</h2>
-            <div th:text="${product.description != null ? product.description : 'Mô tả đang được cập nhật...'}">Mô tả...</div>
-        </div>
-
-        <!-- Đánh giá sản phẩm -->
-        <div class="reviews-section" style="margin-top: 50px; background: #fff; padding: 25px; border-radius: 8px;">
-            <h3 style="margin-bottom: 25px;">ĐÁNH GIÁ TỪ NGƯỜI MUA TRƯỚC</h3>
-            <div th:if="${#lists.isEmpty(product.reviews)}" style="color: #666; font-style: italic;">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên!</div>
-            
-            <div th:each="review : ${product.reviews}" th:if="${review.approved}" style="border-bottom: 1px solid #eee; padding: 15px 0;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <strong th:text="${review.user.fullName}">Tên người dùng</strong>
-                    <span style="color: #ff9800;">
-                        <i th:each="i : ${#numbers.sequence(1, 5)}" 
-                           th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
-                    </span>
+                    <p th:text="${review.comment}" style="color: #ccc;"></p>
                 </div>
-                <div style="font-size: 12px; color: #999; margin-bottom: 10px;" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">01/01/2026</div>
-                <div th:text="${review.comment}">Nội dung đánh giá...</div>
-            </div>
-            
-            <!-- Nút để mở form đánh giá (prototype có thể chỉ là form đơn giản) -->
-            <div style="margin-top: 30px;">
-                <a href="/login" th:if="${#authentication == null or #authentication.principal == 'anonymousUser'}" 
-                   style="color: var(--primary-red); font-weight: bold;">Đăng nhập để gửi đánh giá</a>
-                <form th:if="${#authentication != null and #authentication.principal != 'anonymousUser'}" action="/product/review" method="post">
-                    <input type="hidden" name="productId" th:value="${product.id}">
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 10px; font-weight: 500;">Đánh giá của bạn *</label>
-                        <select name="rating" style="padding: 10px; border: 1px solid #ddd; width: 100%; border-radius: 4px;">
-                            <option value="5">★★★★★ - Rất tốt</option>
-                            <option value="4">★★★★☆ - Tốt</option>
-                            <option value="3">★★★☆☆ - Bình thường</option>
-                            <option value="2">★★☆☆☆ - Kém</option>
-                            <option value="1">★☆☆☆☆ - Rất kém</option>
-                        </select>
-                    </div>
-                    <textarea name="comment" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm này (chất lượng, đóng gói, giao hàng...)"></textarea>
-                    <button type="submit" class="btn-buy-now" style="width: auto; margin-top: 10px; padding: 10px 30px;">GỬI ĐÁNH GIÁ</button>
-                </form>
             </div>
         </div>
     </main>

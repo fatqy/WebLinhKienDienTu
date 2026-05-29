@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký tài khoản – GEARVN.COM</title>
+    <title>Đăng ký tài khoản – EWMI</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .register-container { max-width: 500px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .register-header { text-align: center; margin-bottom: 25px; }
-        .register-header h2 { color: var(--primary-red); text-transform: uppercase; }
-        .form-group { margin-bottom: 15px; position: relative; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; }
-        .password-toggle { position: absolute; right: 10px; top: 35px; cursor: pointer; color: #666; }
-        .btn-register { width: 100%; padding: 12px; background: var(--primary-red); color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .error-text { color: red; font-size: 12px; margin-top: 5px; }
-        .alert-error { background: #ffebee; color: red; padding: 10px; border-radius: 4px; margin-bottom: 20px; }
+        .register-container { max-width: 550px; margin: 50px auto; background: var(--item-bg); padding: 40px; border-radius: 24px; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .register-header { text-align: center; margin-bottom: 30px; }
+        .register-header h2 { font-size: 26px; font-weight: bold; margin-top: 15px; }
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #ccc; }
+        .form-group input { width: 100%; padding: 12px 15px; background: #333; border: 1px solid #555; border-radius: 12px; color: #fff; outline: none; }
+        .password-toggle { position: absolute; right: 15px; top: 43px; cursor: pointer; color: #888; }
+        .btn-register { width: 100%; padding: 15px; background: var(--primary-blue); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 17px; transition: 0.3s; margin-top: 10px; }
+        .btn-register:hover { opacity: 0.9; }
+        .error-text { color: #ff6b6b; font-size: 12px; margin-top: 5px; }
+        .alert-error { background: rgba(255,107,107,0.1); color: #ff6b6b; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255,107,107,0.2); }
     </style>
 </head>
-<body style="background: #f5f5f5;">
+<body style="background: var(--body-bg);">
     <div class="register-container">
         <div class="register-header">
-            <div class="logo">GEARVN</div>
+            <a href="/"><i class="topzone-logo"></i></a>
             <h2>Tạo tài khoản mới</h2>
         </div>
 
@@ -31,43 +32,43 @@
         <form th:action="@{/register}" th:object="${user}" method="post">
             <div class="form-group">
                 <label>Họ và tên</label>
-                <input type="text" th:field="*{fullName}" placeholder="Nhập họ và tên đầy đủ của bạn">
+                <input type="text" th:field="*{fullName}" placeholder="Nhập họ và tên đầy đủ">
             </div>
             <div class="form-group">
                 <label>Tên đăng nhập *</label>
-                <input type="text" th:field="*{username}" placeholder="Nhập tên tài khoản dùng để đăng nhập" required>
+                <input type="text" th:field="*{username}" placeholder="Nhập tên tài khoản" required>
                 <div class="error-text" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
             </div>
             <div class="form-group">
                 <label>Email *</label>
-                <input type="email" th:field="*{email}" placeholder="Nhập địa chỉ email (VD: user@example.com)" required>
+                <input type="email" th:field="*{email}" placeholder="Địa chỉ email của bạn" required>
                 <div class="error-text" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
             </div>
             <div class="form-group">
                 <label>Số điện thoại *</label>
-                <input type="text" th:field="*{phoneNumber}" placeholder="Phải đủ 10 số và bắt đầu bằng số 0" required>
+                <input type="text" th:field="*{phoneNumber}" placeholder="VD: 0987654321" required>
                 <div class="error-text" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
             </div>
             <div class="form-group">
                 <label>Mật khẩu *</label>
-                <input type="password" th:field="*{password}" id="password" placeholder="Tối thiểu 8 ký tự và không chứa khoảng trắng" required>
-                <i class="fa-solid fa-eye-slash password-toggle" id="togglePassword" style="top: 35px;"></i>
+                <input type="password" th:field="*{password}" id="password" placeholder="Tối thiểu 8 ký tự" required>
+                <i class="fa-solid fa-eye-slash password-toggle" id="togglePassword"></i>
                 <div class="error-text" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
             </div>
             <div class="form-group">
                 <label>Xác nhận mật khẩu *</label>
-                <input type="password" th:field="*{confirmPassword}" id="confirmPassword" placeholder="Vui lòng nhập lại mật khẩu để xác nhận" required>
-                <i class="fa-solid fa-eye-slash password-toggle" id="toggleConfirmPassword" style="top: 35px;"></i>
+                <input type="password" th:field="*{confirmPassword}" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                <i class="fa-solid fa-eye-slash password-toggle" id="toggleConfirmPassword"></i>
                 <div class="error-text" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
             </div>
             <div class="form-group">
                 <label>Địa chỉ giao hàng</label>
-                <input type="text" th:field="*{address}" placeholder="Số nhà, tên đường, phường/xã, quận/huyện...">
+                <input type="text" th:field="*{address}" placeholder="Số nhà, tên đường, quận/huyện...">
             </div>
             <button type="submit" class="btn-register">ĐĂNG KÝ</button>
         </form>
-        <div style="text-align: center; margin-top: 15px; font-size: 14px;">
-            Đã có tài khoản? <a href="/login" style="color: var(--primary-red);">Đăng nhập</a>
+        <div style="text-align: center; margin-top: 20px; font-size: 14px; color: #aaa;">
+            Đã có tài khoản? <a href="/login" style="color: var(--primary-blue); font-weight: 600;">Đăng nhập ngay</a>
         </div>
     </div>
 
@@ -82,7 +83,6 @@
                 this.classList.toggle('fa-eye-slash');
             });
         }
-
         setupPasswordToggle('#togglePassword', '#password');
         setupPasswordToggle('#toggleConfirmPassword', '#confirmPassword');
     </script>

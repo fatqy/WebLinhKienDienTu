@@ -13,6 +13,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 
+import com.example.DoAn.model.PasswordResetToken;
+import com.example.DoAn.repository.PasswordResetTokenRepository;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import java.util.UUID;
+import java.time.LocalDateTime;
+
 @Service
 public class UserService {
 
@@ -23,7 +30,46 @@ public class UserService {
     private RoleRepository roleRepository;
 
     @Autowired
+    private PasswordResetTokenRepository tokenRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    public void createPasswordResetTokenForUser(User user, String token) {
+        // Xóa token cũ nếu có
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+        
+        PasswordResetToken myToken = new PasswordResetToken(token, user);
+        tokenRepository.save(myToken);
+    }
+
+    public void sendEmail(String to, String subject, String content) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("WebLinhKien <noreply@weblinhkien.com>");
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(content);
+        mailSender.send(message);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public Optional<PasswordResetToken> getPasswordResetToken(String token) {
+        return tokenRepository.findByToken(token);
+    }
+
+    public void changeUserPassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        // Xóa token sau khi dùng xong
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+    }
+
 
     public void registerNewUser(UserDto userDto) {
         if (userRepository.existsByUsername(userDto.getUsername())) {

@@ -4,181 +4,72 @@
 <body>
     <header th:replace="~{fragments :: header}"></header>
 
-    <main class="container">
-        <div class="main-content">
+    <main class="main">
+        <div class="container" style="display: flex; gap: 30px; padding-top: 30px;">
             <!-- Sidebar Filters -->
-            <aside class="sidebar">
-                <div class="filter-group">
-                    <div class="filter-title">Danh mục sản phẩm</div>
+            <aside class="sidebar" style="width: 250px; flex-shrink: 0;">
+                <div class="filter-group" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                    <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Danh mục</div>
                     <div class="filter-options">
                         <div th:each="category : ${categories}" style="margin-bottom: 10px;">
                             <a th:href="@{/category/{id}(id=${category.id})}" 
                                th:text="${category.name}"
-                               th:style="${currentCategory == category.name ? 'color: var(--primary-red); font-weight: bold;' : ''}"
-                               style="font-size: 14px; display: block; padding: 5px 0; transition: 0.2s;">
+                               th:style="${currentCategory == category.name ? 'color: var(--primary-blue); font-weight: bold;' : 'color: #ccc;'}"
+                               style="font-size: 14px; display: block; padding: 5px 0;">
                                Category Name
                             </a>
                         </div>
-                        <a href="/linh-kien-may-tinh" style="font-size: 13px; color: blue; border-top: 1px solid #eee; display: block; margin-top: 10px; padding-top: 10px;">Tất cả sản phẩm</a>
                     </div>
                 </div>
 
-                <!-- Bộ lọc giá thông minh -->
-                <div class="filter-group">
-                    <div class="filter-title">Khoảng giá tự chọn</div>
-                    <div class="filter-options">
-                        <form th:action="${searchQuery != null ? '/search' : (categoryId != null ? '/category/'+categoryId : '/linh-kien-may-tinh')}" method="get" style="display: flex; flex-direction: column; gap: 8px;">
-                            <!-- Giữ lại từ khóa tìm kiếm nếu có -->
-                            <input type="hidden" name="q" th:if="${searchQuery}" th:value="${searchQuery}">
-                            <!-- Giữ lại thương hiệu đang chọn nếu có -->
-                            <input type="hidden" name="brand" th:if="${currentBrand}" th:value="${currentBrand}">
-                            
-                            <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Giá từ" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; width: 100%;">
-                            <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="đến giá" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; width: 100%;">
-                            <button type="submit" class="btn-action" style="background: var(--primary-red); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">ÁP DỤNG BỘ LỌC</button>
-                        </form>
-                    </div>
+                <!-- Bộ lọc giá -->
+                <div class="filter-group" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                    <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Khoảng giá</div>
+                    <form th:action="${searchQuery != null ? '/search' : (categoryId != null ? '/category/'+categoryId : '/linh-kien-may-tinh')}" method="get" style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="hidden" name="q" th:if="${searchQuery}" th:value="${searchQuery}">
+                        <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Từ" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
+                        <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="Đến" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
+                        <button type="submit" style="background: var(--primary-blue); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">LỌC</button>
+                    </form>
                 </div>
-
-                <!-- Các link lọc giá nhanh -->
-                <div class="filter-group">
-                    <div class="filter-title">Lọc nhanh</div>
-                    <div class="filter-options">
-                        <th:block th:with="baseUrl=${searchQuery != null ? '/search?q='+searchQuery : (categoryId != null ? '/category/'+categoryId+'?' : '/linh-kien-may-tinh?')}, sep=${searchQuery != null ? '&' : ''}">
-                            <a th:href="${baseUrl} + ${sep} + 'maxPrice=1000000'" class="filter-link" th:style="${maxPrice == 1000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">Dưới 1 triệu</a>
-                            <a th:href="${baseUrl} + ${sep} + 'minPrice=1000000&maxPrice=5000000'" class="filter-link" th:style="${minPrice == 1000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">1 - 5 triệu</a>
-                            <a th:href="${baseUrl} + ${sep} + 'minPrice=5000000&maxPrice=10000000'" class="filter-link" th:style="${minPrice == 5000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">5 - 10 triệu</a>
-                            <a th:href="${baseUrl} + ${sep} + 'minPrice=10000000&maxPrice=20000000'" class="filter-link" th:style="${minPrice == 10000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">10 - 20 triệu</a>
-                            <a th:href="${baseUrl} + ${sep} + 'minPrice=20000000'" class="filter-link" th:style="${minPrice == 20000000 ? 'color: var(--primary-red); font-weight: bold;' : ''}">Trên 20 triệu</a>
-                        </th:block>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <div class="filter-title">Thương hiệu</div>
-                    <div class="filter-options">
-                        <th:block th:with="baseUrl=${searchQuery != null ? '/search?q='+searchQuery : (categoryId != null ? '/category/'+categoryId+'?' : '/linh-kien-may-tinh?')}, sep=${searchQuery != null ? '&' : ''}">
-                            <a th:href="${baseUrl} + ${sep} + 'brand=ASUS'" class="filter-link" th:style="${currentBrand == 'ASUS' ? 'color: var(--primary-red); font-weight: bold;' : ''}">ASUS</a>
-                            <a th:href="${baseUrl} + ${sep} + 'brand=MSI'" class="filter-link" th:style="${currentBrand == 'MSI' ? 'color: var(--primary-red); font-weight: bold;' : ''}">MSI</a>
-                            <a th:href="${baseUrl} + ${sep} + 'brand=Intel'" class="filter-link" th:style="${currentBrand == 'Intel' ? 'color: var(--primary-red); font-weight: bold;' : ''}">Intel</a>
-                            <a th:href="${baseUrl} + ${sep} + 'brand=AMD'" class="filter-link" th:style="${currentBrand == 'AMD' ? 'color: var(--primary-red); font-weight: bold;' : ''}">AMD</a>
-                        </th:block>
-                    </div>
-                </div>
-
-                <a href="/linh-kien-may-tinh" style="font-size: 13px; color: blue; border-top: 1px solid #eee; display: block; margin-top: 10px; padding-top: 10px;">Xóa tất cả bộ lọc</a>
             </aside>
 
             <!-- Product Area -->
-            <section class="product-area">
-                <!-- Thanh tìm kiếm nội bộ trang danh mục -->
-                <div class="search-box-inline" style="margin-bottom: 20px;">
-                    <form action="/search" method="get" style="display: flex; gap: 10px;">
-                        <input type="text" name="q" th:value="${searchQuery}" placeholder="Tìm kiếm trong danh mục này..." style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                        <input type="hidden" name="categoryId" th:value="${categoryId}" th:if="${categoryId}">
-                        <button type="submit" class="btn-action" style="background: var(--primary-red); color: white; border: none; padding: 0 25px; border-radius: 4px; cursor: pointer;">TÌM KIẾM</button>
-                    </form>
+            <section style="flex-grow: 1;">
+                <div class="sorting-bar" style="margin-bottom: 30px; color: #fff;">
+                    <h2 th:text="${currentCategory ?: 'Tất cả sản phẩm'}" style="font-size: 24px;">Linh kiện máy tính</h2>
                 </div>
 
-                <div class="sorting-bar">
-                    <div style="font-weight: bold; font-size: 18px;">
-                        <span th:if="${searchQuery}" th:text="'Kết quả tìm kiếm cho: ' + ${searchQuery}">Tìm kiếm</span>
-                        <span th:unless="${searchQuery}" th:text="${currentCategory ?: 'Tất cả sản phẩm'}">Linh kiện máy tính</span>
-                    </div>
-                </div>
-
-                <!-- Hiển thị khi có sản phẩm -->
                 <div class="product-grid" th:if="${not #lists.isEmpty(products)}">
-                    <div th:each="product : ${products}" class="product-card">
-                        <div class="product-badge" th:if="${not #strings.isEmpty(product.badge)}" th:text="${product.badge}">Badge</div>
-                        <div class="product-badge" style="visibility: hidden;" th:if="${#strings.isEmpty(product.badge)}">.</div>
-                        <img th:src="${product.imageUrl}" th:alt="${product.name}" class="product-image">
-                        <div class="product-title" th:text="${product.name}">Product Name</div>
-                        <div class="product-price">
-                            <span class="current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
-                            <span class="original-price" th:text="${product.getFormattedOriginalPrice()}">Old Price</span>
-                        </div>
-                        <button class="add-to-cart">THÊM VÀO GIỎ</button>
-                    </div>
-                </div>
-
-                <!-- Thông báo khi KHÔNG có sản phẩm nào phù hợp -->
-                <div th:if="${#lists.isEmpty(products)}" style="text-align: center; padding: 50px 20px; background: white; border-radius: 8px; margin: 20px 0; border: 1px dashed #ccc;">
-                    <i class="fas fa-search" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
-                    <h3 style="color: #666;">Rất tiếc, không tìm thấy sản phẩm nào phù hợp!</h3>
-                    <p style="color: #888; font-size: 14px;">Bạn hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc giá nhé.</p>
-                    <a href="/linh-kien-may-tinh" class="btn-action" style="background: #3498db; color: white; text-decoration: none; padding: 10px 20px; display: inline-block; margin-top: 15px; border-radius: 4px;">XEM TẤT CẢ SẢN PHẨM</a>
-                </div>
-
-                <!-- Gợi ý sản phẩm -->
-                <div th:if="${not #lists.isEmpty(suggestedProducts)}" style="margin-top: 50px; border-top: 2px solid #eee; padding-top: 30px;">
-                    <h3 style="margin-bottom: 20px; color: #333;">CÓ THỂ BẠN CŨNG ĐANG TÌM</h3>
-                    <div class="product-grid">
-                        <div th:each="product : ${suggestedProducts}" class="product-card">
-                            <img th:src="${product.imageUrl}" th:alt="${product.name}" class="product-image">
-                            <div class="product-title" th:text="${product.name}">Product Name</div>
-                            <div class="product-price">
-                                <span class="current-price" th:text="${product.getFormattedCurrentPrice()}">Price</span>
+                    <div th:each="product : ${products}" class="item">
+                        <a th:href="@{/product/{id}(id=${product.id})}">
+                            <div class="img-slide">
+                                <img th:src="${product.imageUrl}" th:alt="${product.name}">
                             </div>
-                            <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                            <h3 th:text="${product.name}">Product Name</h3>
+                            <div class="box-price">
+                                <strong th:text="${product.getFormattedCurrentPrice()}">0₫</strong>
+                                <strike th:if="${product.salePrice > 0}" th:text="${product.getFormattedOriginalPrice()}">0₫</strike>
+                            </div>
+                        </a>
+                        <div style="padding: 0 15px 15px;">
+                            <form th:action="@{/cart/add}" method="post">
+                                <input type="hidden" name="productId" th:value="${product.id}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="add-to-cart" style="background: var(--primary-blue); width: 100%; border-radius: 8px; border: none; color: #fff; padding: 10px; cursor: pointer; font-weight: 600;">MUA NGAY</button>
+                            </form>
                         </div>
                     </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(products)}" style="text-align: center; padding: 50px; background: var(--item-bg); border-radius: 12px; color: #ccc;">
+                    <p>Không tìm thấy sản phẩm nào phù hợp.</p>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h4>Về GEARVN</h4>
-                    <ul>
-                        <li>Giới thiệu</li>
-                        <li>Tuyển dụng</li>
-                        <li>Liên hệ</li>
-                        <li>Hệ thống cửa hàng</li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Chính sách</h4>
-                    <ul>
-                        <li>Chính sách bảo hành</li>
-                        <li>Chính sách đổi trả</li>
-                        <li>Chính sách vận chuyển</li>
-                        <li>Chính sách thanh toán</li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Hỗ trợ khách hàng</h4>
-                    <ul>
-                        <li>Hotline: 1900.5301</li>
-                        <li>Email: cskh@gearvn.com</li>
-                        <li>Tra cứu bảo hành</li>
-                        <li>Hướng dẫn mua hàng</li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Kết nối với chúng tôi</h4>
-                    <div style="display: flex; gap: 15px; font-size: 24px; color: var(--primary-red);">
-                        <i class="fab fa-facebook"></i>
-                        <i class="fab fa-youtube"></i>
-                        <i class="fab fa-tiktok"></i>
-                        <i class="fab fa-instagram"></i>
-                    </div>
-                    <div style="margin-top: 20px;">
-                        <img src="https://file.hstatic.net/200000722513/file/logo-bct_019590509b704da0816965430e6191a1.png" alt="Bộ công thương" style="width: 120px;">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container">
-                &copy; 2026 GEARVN. All rights reserved. Công ty TNHH Thương Mại GEARVN.
-            </div>
-        </div>
-    </footer>
+    <footer th:replace="~{fragments :: footer}"></footer>
 
 </body>
 </html>

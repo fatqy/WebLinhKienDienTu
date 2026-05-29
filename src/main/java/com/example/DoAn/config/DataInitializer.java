@@ -65,6 +65,7 @@ public class DataInitializer implements CommandLineRunner {
         Category psu = categoryRepository.findByName("Nguồn máy tính").orElseGet(() -> categoryRepository.save(new Category("Nguồn máy tính")));
         Category cases = categoryRepository.findByName("Vỏ Case").orElseGet(() -> categoryRepository.save(new Category("Vỏ Case")));
         Category cooling = categoryRepository.findByName("Tản nhiệt").orElseGet(() -> categoryRepository.save(new Category("Tản nhiệt")));
+        Category monitor = categoryRepository.findByName("Màn hình").orElseGet(() -> categoryRepository.save(new Category("Màn hình")));
         
         // Thêm danh mục mới theo yêu cầu
         Category pcGvn = categoryRepository.findByName("PC GVN").orElseGet(() -> categoryRepository.save(new Category("PC GVN")));
@@ -72,7 +73,11 @@ public class DataInitializer implements CommandLineRunner {
         Category gamingGear = categoryRepository.findByName("Góc Gaming").orElseGet(() -> categoryRepository.save(new Category("Góc Gaming")));
 
         // 4. Khởi tạo Sản phẩm (Luôn cập nhật để đồng bộ ImageAssets)
-        // --- PC GVN ---
+        // --- MÀN HÌNH ---
+        saveP("Màn hình ASUS ROG Swift PG279QM", 15990000, 14500000, 10, "monitor,gaming,asus", "2K 240Hz", monitor, "ASUS");
+        saveP("Màn hình Samsung Odyssey G7", 12500000, 11900000, 15, "monitor,samsung,curved", "Cong", monitor, "Samsung");
+        saveP("Màn hình LG UltraGear 27GP850-B", 9500000, 8900000, 20, "monitor,lg,ultragear", "Nano IPS", monitor, "LG");
+
         saveP("PC GVN Phantom Plus i4070Ti", 45990000, 42990000, 5, "gaming,pc,desktop", "PC Bán Chạy", pcGvn, "GEARVN");
         saveP("PC GVN G-STORM i4060", 22500000, 19900000, 10, "computer,case,rgb", "Giá Hời", pcGvn, "GEARVN");
 

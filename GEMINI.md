@@ -1,7 +1,7 @@
-# GEMINI.md - Hướng dẫn ngữ cảnh cho Dự án "DoAn"
+# EWMI.md - Hướng dẫn ngữ cảnh cho Dự án "EWMI"
 
 ## Tổng quan dự án
-**DoAn** là một ứng dụng web Spring Boot hiện đại được thiết kế như một bản mẫu (prototype) cho nền tảng thương mại điện tử, mô phỏng giao diện và phong cách thẩm mỹ của [GearVN](https://gearvn.com). Dự án tập trung vào giao diện người dùng sạch sẽ, phản hồi nhanh (responsive) để duyệt các mặt hàng linh kiện máy tính.
+**EWMI** là một ứng dụng web Spring Boot hiện đại được thiết kế như một bản mẫu (prototype) cho nền tảng thương mại điện tử.
 
 ### Công nghệ cốt lõi
 *   **Java:** 26 (LTS)
