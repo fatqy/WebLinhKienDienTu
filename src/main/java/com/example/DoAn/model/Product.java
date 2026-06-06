@@ -93,4 +93,17 @@ public class Product {
         if (originalPrice <= salePrice || salePrice <= 0) return 0;
         return (int) ((originalPrice - salePrice) / originalPrice * 100);
     }
+
+    public double getAverageRating() {
+        if (reviews == null || reviews.isEmpty()) return 0.0;
+        double sum = 0;
+        int count = 0;
+        for (Review r : reviews) {
+            if (r.isApproved()) {
+                sum += r.getRating();
+                count++;
+            }
+        }
+        return count == 0 ? 0.0 : Math.round((sum / count) * 10.0) / 10.0;
+    }
 }

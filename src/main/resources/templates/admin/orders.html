@@ -2,195 +2,188 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
 <body>
     <div th:fragment="content">
-        <!-- Thư viện hỗ trợ in ấn và xuất file -->
+        <!-- Libraries for Export -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-        <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <h2 style="margin: 0; color: #2c3e50;">QUẢN LÝ HÓA ĐƠN BÁN HÀNG</h2>
-            <div class="header-actions">
-                <button onclick="exportToExcel()" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px; font-size: 14px;">
-                    <i class="fas fa-file-excel"></i> XUẤT EXCEL
-                </button>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Quản lý hóa đơn</h1>
+                <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Theo dõi trạng thái và xử lý đơn hàng từ khách hàng</p>
+            </div>
+            <button onclick="exportToExcel()" class="flex items-center justify-center px-5 py-2.5 text-sm font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all uppercase">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Xuất Excel
+            </button>
+        </div>
+
+        <!-- Filter Card -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm p-6 mb-8 transition-colors">
+            <form th:action="@{/admin/orders}" method="get" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Tìm kiếm</label>
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Tên khách hàng, SĐT..." class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">
+                </div>
+                <div>
+                    <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Từ ngày</label>
+                    <input type="date" name="startDate" th:value="${startDate}" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">
+                </div>
+                <div>
+                    <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Đến ngày</label>
+                    <input type="date" name="endDate" th:value="${endDate}" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 px-4 py-2.5 text-xs font-black text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-all uppercase">Lọc</button>
+                    <a th:href="@{/admin/orders}" class="flex-1 px-4 py-2.5 text-xs font-black text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 text-center transition-all uppercase dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Xóa</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Orders Table Card -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-500 dark:text-slate-400" id="ordersTable">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300">
+                        <tr>
+                            <th class="px-6 py-4 font-black tracking-wider">Mã HD</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Khách hàng & Địa chỉ</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Ngày tạo</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-right">Tổng tiền</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Trạng thái</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr th:each="order : ${orders}" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-6 py-4 font-black text-slate-900 dark:text-white" th:text="'#' + ${order.id}">#1042</td>
+                            <td class="px-6 py-4">
+                                <div class="font-black text-primary-600 dark:text-primary-400" th:text="${order.fullName}">Họ tên</div>
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400" th:text="${order.phoneNumber}">SĐT</div>
+                                <div class="text-[10px] font-medium text-slate-400 italic truncate max-w-[200px]" th:text="${order.shippingAddress}">Địa chỉ</div>
+                            </td>
+                            <td class="px-6 py-4 text-xs font-bold" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Date</td>
+                            <td class="px-6 py-4 text-right font-black text-slate-900 dark:text-white" th:text="${order.getFormattedTotalAmount()}">0₫</td>
+                            <td class="px-6 py-4 text-center">
+                                <span th:if="${order.status == 'PENDING'}" class="px-3 py-1 text-[10px] font-black uppercase bg-amber-100 text-amber-700 rounded-full">Chờ duyệt</span>
+                                <span th:if="${order.status == 'CONFIRMED'}" class="px-3 py-1 text-[10px] font-black uppercase bg-blue-100 text-blue-700 rounded-full">Đã xác nhận</span>
+                                <span th:if="${order.status == 'SHIPPING'}" class="px-3 py-1 text-[10px] font-black uppercase bg-purple-100 text-purple-700 rounded-full">Đang giao</span>
+                                <span th:if="${order.status == 'COMPLETED'}" class="px-3 py-1 text-[10px] font-black uppercase bg-green-100 text-green-700 rounded-full">Đã giao</span>
+                                <span th:if="${order.status == 'CANCELLED'}" class="px-3 py-1 text-[10px] font-black uppercase bg-red-100 text-red-700 rounded-full">Đã hủy</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-2">
+                                    <form th:action="@{/admin/orders/update-status}" method="post" class="flex gap-1">
+                                        <input type="hidden" name="orderId" th:value="${order.id}">
+                                        <select name="status" class="text-[10px] font-black bg-slate-50 border border-slate-200 rounded-lg p-1 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+                                            <option value="PENDING" th:selected="${order.status == 'PENDING'}">CHỜ</option>
+                                            <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">XÁC NHẬN</option>
+                                            <option value="SHIPPING" th:selected="${order.status == 'SHIPPING'}">GIAO</option>
+                                            <option value="COMPLETED" th:selected="${order.status == 'COMPLETED'}">XONG</option>
+                                            <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">HỦY</option>
+                                        </select>
+                                        <button type="submit" class="p-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors shadow-sm">
+                                            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </form>
+                                    <button th:onclick="'previewInvoice(' + ${order.id} + ')'" class="flex items-center justify-center px-3 py-1.5 text-[10px] font-black text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-all dark:bg-slate-700 dark:text-slate-200">
+                                        <i data-lucide="printer" class="w-3.5 h-3.5 mr-1.5"></i> CHI TIẾT
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Thanh tìm kiếm và bộ lọc -->
-        <div class="filter-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px;">
-            <form th:action="@{/admin/orders}" method="get" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: bold;">Tìm kiếm</label>
-                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Tên khách hàng, SĐT..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
-                </div>
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: bold;">Từ ngày</label>
-                    <input type="date" name="startDate" th:value="${startDate}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                </div>
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: bold;">Đến ngày</label>
-                    <input type="date" name="endDate" th:value="${endDate}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                </div>
-                <button type="submit" class="btn-action" style="background: #3498db; color: white; padding: 9px 20px;">
-                    <i class="fas fa-filter"></i> LỌC
-                </button>
-                <a th:href="@{/admin/orders}" class="btn-action" style="background: #95a5a6; color: white; padding: 9px 20px; text-decoration: none;">
-                    <i class="fas fa-undo"></i> LÀM MỚI
-                </a>
-            </form>
-        </div>
-        
-        <table class="admin-table" id="ordersTable">
-            <thead>
-                <tr>
-                    <th>Mã HD</th>
-                    <th>Khách hàng</th>
-                    <th>Ngày tạo</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                    <th style="text-align: center;">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="order : ${orders}">
-                    <td th:text="'#' + ${order.id}" style="font-weight: bold;">#1</td>
-                    <td>
-                        <div th:text="${order.fullName}" style="font-weight: bold; color: #2980b9;">Name</div>
-                        <div th:text="${order.phoneNumber}" style="font-size: 12px; color: #666;">Phone</div>
-                        <div th:text="${order.shippingAddress}" style="font-size: 11px; color: #888;">Address</div>
-                    </td>
-                    <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Date</td>
-                    <td th:text="${order.getFormattedTotalAmount()}" style="color: var(--primary-red); font-weight: bold;">0₫</td>
-                    <td>
-                        <span th:class="'order-status status-' + ${order.status}" th:text="${order.getStatusDisplay()}">Chờ duyệt</span>
-                    </td>
-                    <td>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <form th:action="@{/admin/orders/update-status}" method="post" style="display: flex; gap: 5px;">
-                                <input type="hidden" name="orderId" th:value="${order.id}">
-                                <select name="status" style="padding: 5px; border-radius: 4px; flex-grow: 1; border: 1px solid #ddd;">
-                                    <option value="PENDING" th:selected="${order.status == 'PENDING'}">Chờ duyệt</option>
-                                    <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">Đã xác nhận</option>
-                                    <option value="SHIPPING" th:selected="${order.status == 'SHIPPING'}">Đang giao</option>
-                                    <option value="COMPLETED" th:selected="${order.status == 'COMPLETED'}">Đã giao</option>
-                                    <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">Đã hủy</option>
-                                </select>
-                                <button type="submit" class="btn-action" style="background: #2ecc71; color: white;">LƯU</button>
-                            </form>
-                            <button th:onclick="'previewInvoice(' + ${order.id} + ')'" class="btn-action" style="background: #34495e; color: white;">
-                                <i class="fas fa-eye"></i> XEM HÓA ĐƠN
+        <!-- Invoice Modal (Tailwind Styled) -->
+        <div id="invoiceModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-sm max-h-full">
+                <div class="relative bg-white rounded-3xl shadow-2xl dark:bg-white border-4 border-double border-slate-900">
+                    <div class="p-6">
+                        <!-- Invoice Content (POS Style) -->
+                        <div id="pos-invoice" class="bg-white text-slate-900 p-2 font-mono text-[11px] leading-tight">
+                            <div class="text-center border-b border-dashed border-slate-900 pb-4 mb-4">
+                                <h2 class="text-base font-black uppercase">EWMI TECHNOLOGY</h2>
+                                <p>128 Trần Quang Khải, P.Tân Định, Q1, HCM</p>
+                                <p>Hotline: 1900.xxxx</p>
+                            </div>
+
+                            <div class="text-center mb-4">
+                                <h3 class="text-sm font-black uppercase mb-1">Hóa đơn bán lẻ</h3>
+                                <p id="inv-id">#0000</p>
+                                <p id="inv-date">Ngày: 01/01/2026</p>
+                            </div>
+
+                            <div class="border-b border-dashed border-slate-900 pb-2 mb-4 space-y-1">
+                                <p><span class="font-black">KH:</span> <span id="inv-customer">A</span></p>
+                                <p><span class="font-black">SĐT:</span> <span id="inv-phone">0xxx</span></p>
+                                <p class="truncate"><span class="font-black">Đ/C:</span> <span id="inv-address">HCM</span></p>
+                            </div>
+
+                            <table class="w-full mb-4">
+                                <thead class="border-b border-slate-900">
+                                    <tr>
+                                        <th class="text-left py-1">SP</th>
+                                        <th class="text-center py-1">SL</th>
+                                        <th class="text-right py-1">Tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inv-items">
+                                    <!-- Dynamic -->
+                                </tbody>
+                            </table>
+
+                            <div class="border-t border-dashed border-slate-900 pt-3 space-y-1">
+                                <div class="flex justify-between font-black text-sm pt-1 border-t border-slate-900">
+                                    <span>TỔNG CỘNG:</span>
+                                    <span id="inv-total">0₫</span>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-6">
+                                <p class="font-bold">Cảm ơn & Hẹn gặp lại!</p>
+                                <div class="flex justify-center mt-3">
+                                    <img id="inv-qrcode" src="" class="w-16 h-16 border p-1 bg-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Actions -->
+                        <div class="grid grid-cols-2 gap-3 mt-6">
+                            <button onclick="printInvoice()" class="flex items-center justify-center px-4 py-2.5 text-[10px] font-black text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-all uppercase">
+                                <i data-lucide="printer" class="w-3.5 h-3.5 mr-2"></i> In ấn
+                            </button>
+                            <button onclick="hideInvoiceModal()" class="flex items-center justify-center px-4 py-2.5 text-[10px] font-black text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-all uppercase">
+                                Đóng
                             </button>
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- MODAL XEM TRƯỚC HÓA ĐƠN (POS STYLE) -->
-        <div id="invoiceModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
-            <div class="modal-content" style="background: white; margin: 2% auto; padding: 20px; border-radius: 8px; width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 30px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
-                    <h3 style="margin: 0;">Xem trước Hóa đơn</h3>
-                    <span onclick="closeModal()" style="cursor: pointer; font-size: 24px;">&times;</span>
-                </div>
-                
-                <!-- Vùng Hóa đơn POS -->
-                <div id="pos-invoice" style="background: white; color: black; padding: 10px; font-family: 'Courier New', Courier, monospace; line-height: 1.2; position: relative;">
-                    <!-- Logo in chìm (Watermark) -->
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; z-index: 0; width: 100%; text-align: center; pointer-events: none;">
-                        <img th:src="${imageAssets.logo}" style="width: 250px; filter: grayscale(100%);">
                     </div>
-
-                    <div style="position: relative; z-index: 1;">
-                        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-                            <h2 style="margin: 0; font-size: 20px;">GEARVN STORE</h2>
-                            <p style="font-size: 12px; margin: 5px 0;">78-80 Hoàng Hoa Thám, P.12, Q.Tân Bình, TP.HCM</p>
-                            <p style="font-size: 12px; margin: 0;">Hotline: 1900.5301</p>
-                        </div>
-
-                        <div style="text-align: center; margin-bottom: 15px;">
-                            <h3 style="margin: 5px 0; font-size: 16px;">HÓA ĐƠN BÁN HÀNG</h3>
-                            <p style="font-size: 12px; margin: 0;" id="inv-id">Mã HD: #000</p>
-                            <p style="font-size: 11px; margin: 0;" id="inv-date">Ngày: 01/01/2026 00:00</p>
-                        </div>
-
-                    <div style="font-size: 12px; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 10px;">
-                        <p style="margin: 2px 0;"><b>K/H:</b> <span id="inv-customer">Nguyễn Văn A</span></p>
-                        <p style="margin: 2px 0;"><b>SĐT:</b> <span id="inv-phone">0987654321</span></p>
-                        <p style="margin: 2px 0;"><b>Đ/C:</b> <span id="inv-address">Hà Nội</span></p>
-                    </div>
-
-                    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid #000;">
-                                <th style="text-align: left;">Sản phẩm</th>
-                                <th style="text-align: center;">SL</th>
-                                <th style="text-align: right;">Đơn giá</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inv-items">
-                            <!-- Items will be loaded here -->
-                        </tbody>
-                    </table>
-
-                    <div style="margin-top: 15px; border-top: 1px dashed #000; padding-top: 10px; font-size: 12px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>Tạm tính:</span>
-                            <span id="inv-subtotal">0₫</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>Thuế VAT (10%):</span>
-                            <span id="inv-vat">0₫</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px; margin-top: 5px; border-top: 1px solid #000; padding-top: 5px;">
-                            <span>TỔNG CỘNG:</span>
-                            <span id="inv-total">0₫</span>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 20px; font-size: 11px;">
-                        <p>Cảm ơn quý khách! Hẹn gặp lại.</p>
-                        <!-- Mã QR Kiểm tra hóa đơn -->
-                        <div style="margin-top: 10px;">
-                            <img id="inv-qrcode" src="" style="width: 80px; height: 80px; border: 1px solid #eee; padding: 5px;">
-                            <p style="margin-top: 5px; font-size: 9px; color: #666;">Quét mã để kiểm tra đơn hàng</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <button onclick="printInvoice()" class="btn-action" style="background: #e67e22; color: white; padding: 10px;">
-                        <i class="fas fa-print"></i> IN HÓA ĐƠN
-                    </button>
-                    <button onclick="downloadPDF()" class="btn-action" style="background: #e74c3c; color: white; padding: 10px;">
-                        <i class="fas fa-file-pdf"></i> XUẤT PDF
-                    </button>
                 </div>
             </div>
         </div>
 
         <script th:inline="javascript">
+            let invModal;
+            document.addEventListener('DOMContentLoaded', function() {
+                invModal = new Modal(document.getElementById('invoiceModal'));
+            });
+
             function previewInvoice(orderId) {
-                // Tìm dòng trong bảng dựa trên mã HD
                 const rows = document.querySelectorAll('#ordersTable tbody tr');
                 let targetRow = null;
                 rows.forEach(row => {
-                    if (row.cells[0].innerText.includes('#' + orderId)) {
-                        targetRow = row;
-                    }
+                    if (row.cells[0].innerText.includes('#' + orderId)) targetRow = row;
                 });
-
                 if (!targetRow) return;
 
-                // Lấy dữ liệu cơ bản từ các ô trong bảng
-                const customerInfo = targetRow.cells[1];
-                const fullName = customerInfo.querySelector('div:nth-child(1)').innerText;
-                const phone = customerInfo.querySelector('div:nth-child(2)').innerText;
-                const address = customerInfo.querySelector('div:nth-child(3)').innerText;
+                const fullName = targetRow.cells[1].querySelector('div:nth-child(1)').innerText;
+                const phone = targetRow.cells[1].querySelector('div:nth-child(2)').innerText;
+                const address = targetRow.cells[1].querySelector('div:nth-child(3)').innerText;
                 const date = targetRow.cells[2].innerText;
                 const total = targetRow.cells[3].innerText;
 
-                // Cập nhật thông tin vào Modal
                 document.getElementById('inv-id').innerText = 'Mã HD: #' + orderId;
                 document.getElementById('inv-date').innerText = 'Ngày: ' + date;
                 document.getElementById('inv-customer').innerText = fullName;
@@ -198,92 +191,36 @@
                 document.getElementById('inv-address').innerText = address;
                 document.getElementById('inv-total').innerText = total;
 
-                // Tạo mã QR động
-                const qrData = `Ma HD: #${orderId} | Khach hang: ${fullName} | Tong tien: ${total}`;
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
-                document.getElementById('inv-qrcode').src = qrUrl;
+                const qrData = `HD:#${orderId}|${fullName}|${total}`;
+                document.getElementById('inv-qrcode').src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrData)}`;
 
-                // Vì lý do bảo mật và tránh vòng lặp JSON, chúng ta sẽ lấy danh sách item từ một API 
-                // Hoặc đơn giản là hiển thị thông tin tổng quát nếu không muốn truy vấn thêm.
-                // Ở đây tôi sẽ giả lập hiển thị 1 dòng tổng quát để hóa đơn không bị trống
-                const itemsContainer = document.getElementById('inv-items');
-                itemsContainer.innerHTML = `
+                document.getElementById('inv-items').innerHTML = `
                     <tr>
-                        <td style="padding: 5px 0;">Đơn hàng linh kiện #${orderId}</td>
-                        <td style="text-align: center;">1</td>
-                        <td style="text-align: right;">${total}</td>
+                        <td class="py-1">Đơn hàng #${orderId}</td>
+                        <td class="text-center py-1">1</td>
+                        <td class="text-right py-1">${total}</td>
                     </tr>
                 `;
-
-                document.getElementById('inv-subtotal').innerText = total;
-                document.getElementById('inv-vat').innerText = 'Đã bao gồm';
                 
-                document.getElementById('invoiceModal').style.display = 'block';
+                invModal.show();
             }
 
-            function closeModal() {
-                document.getElementById('invoiceModal').style.display = 'none';
-            }
+            function hideInvoiceModal() { invModal.hide(); }
 
             function printInvoice() {
                 const content = document.getElementById('pos-invoice').innerHTML;
                 const win = window.open('', '_blank');
-                win.document.write('<html><head><title>In Hoa Don</title>');
-                win.document.write('<style>body{font-family:monospace;padding:20px;} table{width:100%;border-collapse:collapse;}</style>');
-                win.document.write('</head><body>');
-                win.document.write(content);
-                win.document.write('</body></html>');
+                win.document.write('<html><head><style>body{font-family:monospace;padding:20px;width:300px;margin:auto;}</style></head><body>' + content + '</body></html>');
                 win.document.close();
-                win.print();
-            }
-
-            function downloadPDF() {
-                const { jsPDF } = window.jspdf;
-                const element = document.getElementById('pos-invoice');
-                html2canvas(element).then((canvas) => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jsPDF('p', 'mm', [80, 150]);
-                    pdf.addImage(imgData, 'PNG', 0, 0, 80, 150);
-                    pdf.save('HoaDon.pdf');
-                });
+                win.focus();
+                setTimeout(() => { win.print(); win.close(); }, 500);
             }
 
             function exportToExcel() {
-                try {
-                    const table = document.getElementById("ordersTable");
-                    const wb = XLSX.utils.table_to_book(table, {sheet: "Orders"});
-                    XLSX.writeFile(wb, `HoaDon_${new Date().getTime()}.xlsx`);
-                } catch (e) {
-                    alert("Lỗi xuất Excel: " + e.message);
-                }
-            }
-
-            window.onclick = function(event) {
-                if (event.target == document.getElementById('invoiceModal')) closeModal();
+                const wb = XLSX.utils.table_to_book(document.getElementById("ordersTable"), {sheet: "Hóa đơn"});
+                XLSX.writeFile(wb, `HoaDon_EWMI_${new Date().getTime()}.xlsx`);
             }
         </script>
-
-        <style>
-            .status-PENDING { background: #f1c40f; color: black; }
-            .status-CONFIRMED { background: #3498db; color: white; }
-            .status-SHIPPING { background: #e67e22; color: white; }
-            .status-COMPLETED { background: #2ecc71; color: white; }
-            .status-CANCELLED { background: #e74c3c; color: white; }
-            
-            .order-status {
-                padding: 4px 8px;
-                border-radius: 12px;
-                font-size: 11px;
-                font-weight: bold;
-                text-transform: uppercase;
-            }
-            
-            .admin-table th {
-                text-transform: uppercase;
-                font-size: 13px;
-                color: #7f8c8d;
-            }
-        </style>
     </div>
 </body>
 </html>

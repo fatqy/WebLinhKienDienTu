@@ -13,67 +13,210 @@
         <div class="head">
             <div class="logo-topzone">
                 <a href="/" class="ewmi-logo-container">
-                    <span class="ewmi-logo-text">EWMI</span>
-                    <span class="ewmi-dot"></span>
+                    <span class="ewmi-logo-text" style="color: #fff !important; background: none !important; -webkit-text-fill-color: #fff !important;">EWMI</span>
+                    <span class="ewmi-dot" style="background-color: #fff !important;"></span>
                 </a>
             </div>
-            <ul class="menu">
-                <li th:each="catName : ${ {'PC GVN', 'Laptop', 'Góc Gaming', 'Màn hình'} }">
-                    <th:block th:each="cat : ${categories}" th:if="${cat.name == catName}">
-                        <a th:href="@{/category/{id}(id=${cat.id})}">
-                            <span th:text="${catName == 'PC GVN' ? 'Máy tính' : (catName == 'Góc Gaming' ? 'Gear' : catName)}">Category</span>
-                        </a>
-                    </th:block>
-                </li>
-                <li><a href="/linh-kien-may-tinh"><span>Phụ kiện</span></a></li>
-                <li><a href="/news"><span>TekZone</span></a></li>
-            </ul>
-            <div class="header-actions">
-                <div class="search-sp" onclick="document.querySelector('.form-search').classList.toggle('active')">
-                    <i class="fas fa-search" style="color: #fff; font-size: 18px;"></i>
-                </div>
-                <div class="action-item">
-                    <a href="/cart" class="cart">
-                        <i class="fas fa-shopping-cart" style="color: #fff; font-size: 18px;"></i>
+            
+            <style>
+                .menu-dropdown-container {
+                    position: relative;
+                    margin-left: 10px;
+                    z-index: 10005;
+                }
+                .menu-dropdown-container::after {
+                    content: '';
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    width: 100%;
+                    height: 15px;
+                }
+                .menu-dropdown-content {
+                    position: absolute;
+                    top: calc(100% + 15px);
+                    left: 0;
+                    background: rgba(255, 255, 255, 0.96);
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 16px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05);
+                    min-width: 240px;
+                    opacity: 0;
+                    visibility: hidden;
+                    transform: translateY(15px) scale(0.95);
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    padding: 8px;
+                }
+                .menu-dropdown-container:hover .menu-dropdown-content {
+                    opacity: 1;
+                    visibility: visible;
+                    transform: translateY(0) scale(1);
+                }
+                .menu-dropdown-content::before {
+                    content: '';
+                    position: absolute;
+                    top: -6px;
+                    left: 24px;
+                    width: 12px;
+                    height: 12px;
+                    background: rgba(255, 255, 255, 0.96);
+                    transform: rotate(45deg);
+                    box-shadow: -2px -2px 5px rgba(0,0,0,0.02);
+                    border-top: 1px solid rgba(255, 255, 255, 0.3);
+                    border-left: 1px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 2px;
+                }
+                .menu-dropdown-right .menu-dropdown-content::before {
+                    left: auto;
+                    right: 24px;
+                }
+                .menu-dropdown-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 10px 14px;
+                    margin-bottom: 2px;
+                    border-radius: 10px;
+                    color: #475569;
+                    text-decoration: none;
+                    font-size: 14px;
+                    font-weight: 600;
+                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .menu-dropdown-item:last-child {
+                    margin-bottom: 0;
+                }
+                .menu-dropdown-item:hover {
+                    background-color: #f0f9ff;
+                    color: #0284c7;
+                    transform: translateX(4px);
+                }
+                .menu-dropdown-item i {
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #f1f5f9;
+                    border-radius: 8px;
+                    color: #64748b;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                }
+                .menu-dropdown-item:hover i {
+                    background: #e0f2fe;
+                    color: #0284c7;
+                    transform: scale(1.1);
+                }
+                .menu-dropdown-right .menu-dropdown-content {
+                    left: auto;
+                    right: 0;
+                }
+                .menu-divider {
+                    height: 1px;
+                    background-color: #e2e8f0;
+                    margin: 8px 0;
+                }
+            </style>
+            <div class="menu-dropdown-container">
+                <a href="/linh-kien-may-tinh" class="btn-cps-menu" style="display: flex; align-items: center; gap: 8px; color: #fff; background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: bold; text-decoration: none;">
+                    <i class="fas fa-bars"></i> Danh mục
+                </a>
+                <div class="menu-dropdown-content">
+                    <a th:each="category : ${categories}" th:href="@{/category/{id}(id=${category.id})}" class="menu-dropdown-item">
+                        <i class="fas fa-microchip" th:if="${category.name == 'Linh kiện máy tính'}"></i>
+                        <i class="fas fa-laptop" th:if="${category.name == 'Laptop'}"></i>
+                        <i class="fas fa-mobile-alt" th:if="${category.name == 'Điện thoại'}"></i>
+                        <i class="fas fa-desktop" th:if="${category.name == 'Màn hình'}"></i>
+                        <i class="fas fa-keyboard" th:if="${category.name == 'Bàn phím'}"></i>
+                        <i class="fas fa-mouse" th:if="${category.name == 'Chuột'}"></i>
+                        <i class="fas fa-layer-group" th:unless="${category.name == 'Linh kiện máy tính' or category.name == 'Laptop' or category.name == 'Điện thoại' or category.name == 'Màn hình' or category.name == 'Bàn phím' or category.name == 'Chuột'}"></i>
+                        <span th:text="${category.name}">Tên danh mục</span>
                     </a>
                 </div>
-                <div sec:authorize="isAnonymous()" class="action-item">
-                    <a href="/login"><i class="fas fa-user"></i><span>Đăng nhập</span></a>
+            </div>
+
+            <!-- Search Bar directly inside Header -->
+            <div class="cps-search-wrapper" style="flex: 1; max-width: 450px; margin: 0 20px; position: relative;">
+                <form th:action="@{/search}" method="get" style="display: flex; width: 100%; margin: 0;">
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="searchInput" name="q" placeholder="Bạn cần tìm gì?" th:value="${searchQuery}" autocomplete="off" style="width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; border: none; background: #fff; color: #333; font-size: 14px; outline: none;">
+                        <i class="fas fa-search" style="position: absolute; left: 15px; top: 12px; color: #757575;"></i>
+                    </div>
+                </form>
+                <div id="suggestionBox" style="display: none; position: absolute; top: 45px; left: 0; width: 100%; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 10000; border: 1px solid #eee;"></div>
+            </div>
+
+            <div class="header-actions" style="display: flex; gap: 15px; align-items: center;">
+                <div class="action-item" style="display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12px; line-height: 1.3;">
+                    <i class="fas fa-phone-alt" style="font-size: 18px;"></i>
+                    <div>
+                        <span>Gọi mua hàng</span><br>
+                        <strong>1900.9696</strong>
+                    </div>
                 </div>
-                <div sec:authorize="isAuthenticated()" class="action-item dropdown" onclick="this.querySelector('.dropdown-content').style.display = (this.querySelector('.dropdown-content').style.display === 'block') ? 'none' : 'block'">
-                    <a href="javascript:void(0)"><i class="fas fa-user-check"></i><span sec:authentication="name">User</span></a>
-                    <div class="dropdown-content">
-                        <a href="/profile"><i class="fas fa-id-card"></i> Hồ sơ</a>
-                        <a href="/order-history"><i class="fas fa-history"></i> Đơn hàng</a>
-                        <a sec:authorize="hasAuthority('ROLE_ADMIN')" href="/admin/dashboard" style="color: blue !important;"><i class="fas fa-user-shield"></i> Admin</a>
-                        <a href="/logout" style="color: red !important; border-top: 1px solid #eee;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+
+                <div class="menu-dropdown-container menu-dropdown-right">
+                    <a href="/cart" class="cart" style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; gap: 8px; height: auto; width: auto; text-decoration: none;">
+                        <i class="fas fa-shopping-cart" style="color: #fff; font-size: 18px;"></i>
+                        <span style="color: #fff; font-size: 12px; font-weight: bold;">Giỏ hàng</span>
+                    </a>
+                    <div class="menu-dropdown-content">
+                        <div style="padding: 20px 10px; font-size: 14px; color: #64748b; text-align: center;">
+                            <i class="fas fa-box-open" style="font-size: 36px; color: #cbd5e1; margin-bottom: 12px; background: transparent; width: auto; height: auto;"></i><br>
+                            Giỏ hàng đang trống
+                        </div>
+                        <div class="menu-divider"></div>
+                        <a href="/cart" class="menu-dropdown-item" style="justify-content: center; color: #0284c7;">
+                            <i class="fas fa-shopping-cart" style="background: transparent; width: auto; height: auto; transform: none;"></i> Xem giỏ hàng
+                        </a>
+                    </div>
+                </div>
+                
+                <div sec:authorize="isAnonymous()" class="menu-dropdown-container menu-dropdown-right">
+                    <a href="/login" style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12px; font-weight: bold; text-decoration: none;">
+                        <i class="fas fa-user" style="font-size: 18px;"></i>
+                        <span>Tài khoản</span>
+                    </a>
+                    <div class="menu-dropdown-content">
+                        <a href="/login" class="menu-dropdown-item">
+                            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                        </a>
+                        <a href="/register" class="menu-dropdown-item">
+                            <i class="fas fa-user-plus"></i> Đăng ký
+                        </a>
+                    </div>
+                </div>
+                
+                <div sec:authorize="isAuthenticated()" class="menu-dropdown-container menu-dropdown-right">
+                    <a href="/profile" style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12px; font-weight: bold; text-decoration: none;">
+                        <i class="fas fa-user-check" style="font-size: 18px;"></i>
+                        <span sec:authentication="name">User</span>
+                    </a>
+                    <div class="menu-dropdown-content">
+                        <a href="/profile" class="menu-dropdown-item">
+                            <i class="fas fa-id-card"></i> Hồ sơ
+                        </a>
+                        <a href="/order-history" class="menu-dropdown-item">
+                            <i class="fas fa-history"></i> Đơn hàng
+                        </a>
+                        <a sec:authorize="hasAuthority('ROLE_ADMIN')" href="/admin/dashboard" class="menu-dropdown-item" style="color: #4f46e5;">
+                            <i class="fas fa-user-shield" style="color: #4f46e5; background: #e0e7ff;"></i> Quản trị Admin
+                        </a>
+                        <div class="menu-divider"></div>
+                        <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
+                            <button type="submit" class="menu-dropdown-item" style="width: 100%; border: none; background: none; font-family: inherit; font-size: inherit; cursor: pointer; justify-content: flex-start; margin: 0; color: #ef4444;">
+                                <i class="fas fa-sign-out-alt" style="color: #ef4444; background: #fef2f2;"></i> Đăng xuất
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-
-            <!-- Integrated Search Form -->
-            <form class="form-search" th:action="@{/search}" method="get" style="display: none; position: absolute; top: 60px; left: 0; width: 100%; background: #1a1a1a; padding: 15px; z-index: 9999;">
-                <div class="click-search" style="max-width: 800px; margin: 0 auto; position: relative;">
-                    <input type="text" id="searchInput" name="q" placeholder="Bạn cần tìm gì?" th:value="${searchQuery}" autocomplete="off" style="width: 100%; padding: 12px 40px; border-radius: 8px; border: 1px solid #333; background: #2f3033; color: #fff;">
-                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; opacity: 0.5; color: #fff;"></i>
-                    <i class="fas fa-times" style="position: absolute; right: 12px; top: 12px; cursor: pointer; color: #fff;" onclick="document.getElementById('searchInput').value=''"></i>
-                </div>
-                <div id="suggestionBox" style="display: none; max-width: 800px; margin: 10px auto 0; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
-            </form>
             
             <script>
-                // Toggle Search Form
-                document.querySelector('.search-sp').addEventListener('click', function(e) {
-                    const form = document.querySelector('.form-search');
-                    if (form.style.display === 'none' || form.style.display === '') {
-                        form.style.display = 'block';
-                        document.getElementById('searchInput').focus();
-                    } else {
-                        form.style.display = 'none';
-                    }
-                });
-
-                // Search Logic
+                // Live Search Box Suggestion Logic
                 const searchInput = document.getElementById('searchInput');
                 const suggestionBox = document.getElementById('suggestionBox');
                 let debounceTimer;
@@ -81,7 +224,7 @@
                 searchInput.addEventListener('input', function() {
                     clearTimeout(debounceTimer);
                     const query = this.value.trim();
-                    if (query.length < 2) {
+                    if (query.length < 1) {
                         suggestionBox.style.display = 'none';
                         return;
                     }
@@ -92,10 +235,10 @@
                                 if (data.length > 0) {
                                     suggestionBox.innerHTML = data.map(item => `
                                         <a href="/product/${item.id}" style="display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333;">
-                                            <img src="${item.imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                                            <img src="${item.imageUrl}" style="width: 45px; height: 45px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px; border: 1px solid #eee;">
                                             <div style="flex-grow: 1;">
-                                                <div style="font-size: 14px; font-weight: 600;">${item.name}</div>
-                                                <div style="color: #0071e3; font-size: 13px; font-weight: bold;">${new Intl.NumberFormat('vi-VN').format(item.salePrice > 0 ? item.salePrice : item.originalPrice)}₫</div>
+                                                <div style="font-size: 13px; font-weight: 600; color: #333; line-height: 1.4;">${item.name}</div>
+                                                <div style="color: #d70018; font-size: 12px; font-weight: bold; margin-top: 3px;">${new Intl.NumberFormat('vi-VN').format(item.salePrice > 0 ? item.salePrice : item.originalPrice)}₫</div>
                                             </div>
                                         </a>
                                     `).join('');
@@ -108,9 +251,8 @@
                 });
 
                 document.addEventListener('click', function(e) {
-                    if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target) && !e.target.closest('.search-sp')) {
+                    if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target)) {
                         suggestionBox.style.display = 'none';
-                        document.querySelector('.form-search').style.display = 'none';
                     }
                 });
             </script>

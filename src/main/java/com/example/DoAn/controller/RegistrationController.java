@@ -2,8 +2,13 @@ package com.example.DoAn.controller;
 
 import com.example.DoAn.dto.UserDto;
 import com.example.DoAn.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,6 +21,21 @@ public class RegistrationController {
 
     @Autowired
     private UserService userService;
+
+    // Custom Logout Handler để giải quyết dứt điểm lỗi 404/405
+    @GetMapping("/logout")
+    public String logoutPage(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/logout")
+    public String logoutPagePost(HttpServletRequest request, HttpServletResponse response) {
+        return logoutPage(request, response);
+    }
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {

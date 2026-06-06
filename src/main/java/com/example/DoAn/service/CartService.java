@@ -23,6 +23,9 @@ public class CartService {
     private ProductRepository productRepository;
 
     public void addToCart(User user, Long productId, int quantity) {
+        if (quantity <= 0) {
+            throw new RuntimeException("Số lượng đặt mua phải lớn hơn 0");
+        }
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
@@ -65,14 +68,26 @@ public class CartService {
                 .sum();
     }
 
-    public void removeFromCart(Long cartItemId) {
-        cartItemRepository.deleteById(cartItemId);
+    public void removeFromCart(Long cartItemId, User user) {
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Mặt hàng không tồn tại trong giỏ hàng"));
+        if (!item.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Bạn không có quyền xóa mặt hàng này");
+        }
+        cartItemRepository.delete(item);
     }
     
-    public void updateQuantity(Long cartItemId, int quantity) {
-        CartItem item = cartItemRepository.findById(cartItemId).orElseThrow();
+    public void updateQuantity(Long cartItemId, int quantity, User user) {
+        if (quantity <= 0) {
+            throw new RuntimeException("Số lượng phải lớn hơn 0");
+        }
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Mặt hàng không tồn tại trong giỏ hàng"));
+        if (!item.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Bạn không có quyền cập nhật mặt hàng này");
+        }
         if (item.getProduct().getStock() < quantity) {
-            throw new RuntimeException("Không đủ hàng");
+            throw new RuntimeException("Không đủ hàng trong kho");
         }
         item.setQuantity(quantity);
         cartItemRepository.save(item);

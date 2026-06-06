@@ -2,70 +2,266 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
 <body>
     <div th:fragment="content">
-        <h2 style="margin-bottom: 25px;">BẢNG ĐIỀU KHIỂN</h2>
-        
-        <!-- Cảnh báo hết hàng -->
-        <div th:if="${not #lists.isEmpty(lowStockProducts)}" class="alert-low-stock" style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>Cảnh báo:</strong> Có <span th:text="${#lists.size(lowStockProducts)}">0</span> sản phẩm sắp hết hàng (số lượng < 5).
-            <a href="/admin/products" style="color: #856404; text-decoration: underline; margin-left: 10px;">Xem ngay</a>
+        <!-- Dashboard Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl tracking-tight">Tổng quan hệ thống</h1>
+            <p class="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">Chào mừng trở lại, hôm nay là ngày <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">03/06/2026</span>.</p>
         </div>
 
-        <div class="card-stats">
-            <div class="stat-item" style="border-left-color: #27ae60;">
-                <h4>Doanh thu hôm nay</h4>
-                <p th:text="${#numbers.formatDecimal(dailyRevenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
-            </div>
-            <div class="stat-item" style="border-left-color: #2980b9;">
-                <h4>Doanh thu tháng này</h4>
-                <p th:text="${#numbers.formatDecimal(monthlyRevenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
-            </div>
-            <div class="stat-item">
-                <h4>Tổng doanh thu</h4>
-                <p th:text="${#numbers.formatDecimal(revenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
-            </div>
-            <div class="stat-item" style="border-left-color: #f39c12;">
-                <h4>Đơn hàng chờ duyệt</h4>
-                <p th:text="${newOrdersCount}">0</p>
-            </div>
-            <div class="stat-item" style="border-left-color: #8e44ad;">
-                <h4>Khách hàng</h4>
-                <p th:text="${customerCount}">0</p>
+        <!-- Alert: Low Stock -->
+        <div th:if="${not #lists.isEmpty(lowStockProducts)}" class="flex p-4 mb-8 text-sm text-amber-800 border border-amber-200 rounded-2xl bg-amber-50 dark:bg-slate-800 dark:text-amber-400 dark:border-amber-900/50 shadow-sm animate-pulse" role="alert">
+            <i data-lucide="alert-triangle" class="flex-shrink-0 inline w-5 h-5 mr-3"></i>
+            <span class="sr-only">Cảnh báo</span>
+            <div>
+                <span class="font-bold">Cảnh báo tồn kho:</span> Có <span class="font-extrabold" th:text="${#lists.size(lowStockProducts)}">5</span> sản phẩm sắp hết hàng (số lượng < 5). 
+                <a href="/admin/products" class="ml-2 font-bold underline hover:no-underline">Xử lý ngay</a>
             </div>
         </div>
 
-        <h3>Đơn hàng mới nhất</h3>
-        <table class="admin-table" style="margin-top: 20px;">
-            <thead>
-                <tr>
-                    <th>Mã đơn</th>
-                    <th>Khách hàng</th>
-                    <th>Ngày đặt</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="order : ${recentOrders}">
-                    <td th:text="'#' + ${order.id}">#1</td>
-                    <td th:text="${order.fullName}">User</td>
-                    <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Date</td>
-                    <td th:text="${order.getFormattedTotalAmount()}" style="color: var(--primary-red); font-weight: bold;">0₫</td>
-                    <td>
-                        <span th:class="'order-status status-' + ${order.status}" th:text="${order.status}">PENDING</span>
-                    </td>
-                    <td><a th:href="@{/admin/orders}" class="btn-action" style="background: #3498db; color: white;">Xem</a></td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-4 sm:grid-cols-2">
+            <!-- Total Revenue -->
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow transition-colors">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400">
+                        <i data-lucide="banknote" class="w-6 h-6"></i>
+                    </div>
+                    <span class="flex items-center px-2 py-1 text-xs font-black text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-400 rounded-lg">
+                        <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> +12.5%
+                    </span>
+                </div>
+                <h3 class="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Tổng doanh thu</h3>
+                <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white" th:text="${#numbers.formatDecimal(revenue, 0, 'COMMA', 0, 'POINT') + '₫'}">1,250,000,000₫</p>
+                <div class="mt-4 flex items-center text-xs">
+                    <span class="font-bold text-slate-500 dark:text-slate-400">Tháng này: </span>
+                    <span class="ml-1 font-black text-primary-700 dark:text-primary-400" th:text="${#numbers.formatDecimal(monthlyRevenue, 0, 'COMMA', 0, 'POINT') + '₫'}">450k</span>
+                </div>
+            </div>
 
-        <!-- Nút thoát ra trang chủ -->
-        <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
-            <a href="/" class="btn-action" style="background: #34495e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                <i class="fas fa-home"></i> THOÁT RA TRANG CHỦ
-            </a>
+            <!-- Total Orders -->
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow transition-colors">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-2xl text-purple-600 dark:text-purple-400">
+                        <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                    </div>
+                    <span class="flex items-center px-2 py-1 text-xs font-black text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-400 rounded-lg">
+                        <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> +8.2%
+                    </span>
+                </div>
+                <h3 class="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Đơn hàng mới</h3>
+                <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white" th:text="${newOrdersCount}">156</p>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mt-5">
+                    <div class="bg-purple-600 h-2 rounded-full shadow-sm" style="width: 70%"></div>
+                </div>
+            </div>
+
+            <!-- Total Customers -->
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow transition-colors">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl text-emerald-600 dark:text-emerald-400">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                    <span class="flex items-center px-2 py-1 text-xs font-black text-slate-700 bg-slate-100 dark:bg-slate-700 dark:text-slate-200 rounded-lg">
+                        Tháng này
+                    </span>
+                </div>
+                <h3 class="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Người dùng</h3>
+                <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white" th:text="${customerCount}">2,450</p>
+                <div class="mt-4 flex -space-x-2">
+                    <img class="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800" src="https://i.pravatar.cc/100?u=1" alt="">
+                    <img class="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800" src="https://i.pravatar.cc/100?u=2" alt="">
+                    <img class="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800" src="https://i.pravatar.cc/100?u=3" alt="">
+                    <div class="flex items-center justify-center w-7 h-7 text-[10px] font-black text-white bg-slate-500 border-2 border-white dark:border-slate-800 rounded-full">+12</div>
+                </div>
+            </div>
+
+            <!-- Today Revenue -->
+            <div class="p-6 bg-primary-600 rounded-3xl shadow-lg shadow-primary-500/20 text-white transition-transform hover:scale-[1.02]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-white/20 rounded-2xl">
+                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+                <h3 class="text-sm font-bold text-white/80 uppercase tracking-wider">Doanh thu hôm nay</h3>
+                <p class="mt-2 text-2xl font-black" th:text="${#numbers.formatDecimal(dailyRevenue, 0, 'COMMA', 0, 'POINT') + '₫'}">24,500,000₫</p>
+                <p class="mt-4 text-xs font-medium text-white/60 italic">* Dữ liệu cập nhật thời gian thực</p>
+            </div>
         </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <!-- Revenue Chart -->
+            <div class="lg:col-span-2 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Phân tích doanh thu</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Thống kê 6 tháng gần nhất</p>
+                    </div>
+                    <select class="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-xl focus:ring-primary-500 focus:border-primary-500 block p-2 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white outline-none">
+                        <option selected>Năm 2026</option>
+                        <option value="2025">Năm 2025</option>
+                    </select>
+                </div>
+                <div class="relative h-[300px]">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity / Notifications -->
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Hoạt động gần đây</h3>
+                <div class="space-y-6">
+                    <div th:each="order, stat : ${recentOrders}" th:if="${stat.index < 4}" class="flex">
+                        <div class="flex flex-col items-center mr-4">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full" 
+                                 th:classappend="${order.status == 'PENDING' ? 'bg-green-100 dark:bg-green-900/30' : (order.status == 'CANCELLED' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30')}">
+                                <i data-lucide="shopping-cart" class="w-4 h-4" 
+                                   th:classappend="${order.status == 'PENDING' ? 'text-green-600' : (order.status == 'CANCELLED' ? 'text-red-600' : 'text-blue-600')}"></i>
+                            </div>
+                            <div th:if="${!stat.last and stat.index < 3}" class="w-px h-full bg-slate-200 dark:bg-slate-700 my-1"></div>
+                        </div>
+                        <div class="pb-6">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200" th:text="'Đơn hàng mới #' + ${order.id}">Đơn hàng mới</p>
+                            <p class="text-xs text-slate-500 mt-1" th:text="${#temporals.format(order.orderDate, 'HH:mm dd/MM/yyyy')} + ' • Đặt bởi ' + ${order.fullName}">Thời gian</p>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(recentOrders)}" class="text-center text-slate-500 text-sm py-4">
+                        Chưa có hoạt động nào.
+                    </div>
+                </div>
+                <a href="/admin/orders" class="block text-center w-full mt-6 py-3 text-sm font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/30 rounded-2xl transition-colors">
+                    Xem tất cả đơn hàng
+                </a>
+            </div>
+        </div>
+
+        <!-- Latest Orders Table -->
+        <div class="mt-8 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden transition-colors">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Đơn hàng mới nhất</h3>
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Xuất Excel</button>
+                    <a href="/admin/orders" class="px-4 py-2 text-xs font-bold bg-primary-600 text-white rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/20 transition-all">Quản lý tất cả</a>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 font-extrabold tracking-wider">Mã đơn</th>
+                            <th scope="col" class="px-6 py-4 font-extrabold tracking-wider">Khách hàng</th>
+                            <th scope="col" class="px-6 py-4 font-extrabold tracking-wider">Ngày đặt</th>
+                            <th scope="col" class="px-6 py-4 font-extrabold tracking-wider text-right">Tổng tiền</th>
+                            <th scope="col" class="px-6 py-4 font-extrabold tracking-wider text-center">Trạng thái</th>
+                            <th scope="col" class="px-6 py-4 font-extrabold tracking-wider text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(recentOrders)}">
+                            <td colspan="6" class="px-6 py-20 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i data-lucide="package-open" class="w-12 h-12 text-slate-300 mb-4"></i>
+                                    <p class="text-lg font-bold text-slate-400">Chưa có đơn hàng nào hôm nay</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Data Row -->
+                        <tr th:each="order : ${recentOrders}" class="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+                            <td class="px-6 py-4 font-bold text-slate-900 dark:text-white" th:text="'#' + ${order.id}">#1042</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-300 font-black text-[10px] mr-3" th:text="${#strings.substring(order.fullName,0,1)}">N</div>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-200" th:text="${order.fullName}">Nguyễn Văn A</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-xs font-medium" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">03/06/2026 14:20</td>
+                            <td class="px-6 py-4 text-right font-black text-slate-900 dark:text-white" th:text="${order.getFormattedTotalAmount()}">12,500,000₫</td>
+                            <td class="px-6 py-4 text-center">
+                                <span th:if="${order.status == 'PENDING'}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">Chờ duyệt</span>
+                                <span th:if="${order.status == 'CONFIRMED'}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-blue-700 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 rounded-full">Đã xác nhận</span>
+                                <span th:if="${order.status == 'SHIPPING'}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-purple-700 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400 rounded-full">Đang giao</span>
+                                <span th:if="${order.status == 'COMPLETED'}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">Hoàn thành</span>
+                                <span th:if="${order.status == 'CANCELLED'}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Đã hủy</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a th:href="@{/admin/orders}" class="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-white transition-colors inline-block">
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Table Pagination UI (Visual only for now) -->
+            <div class="flex items-center justify-between mt-6 px-2">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Hiển thị 1 - 5 trên 15 đơn hàng</span>
+                <nav class="inline-flex -space-x-px">
+                    <button class="px-3 py-2 ml-0 leading-tight text-slate-500 bg-white border border-slate-200 rounded-l-xl hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <button class="px-4 py-2 leading-tight text-white bg-primary-600 border border-primary-600 hover:bg-primary-700 font-bold text-xs">1</button>
+                    <button class="px-4 py-2 leading-tight text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 font-bold text-xs">2</button>
+                    <button class="px-3 py-2 leading-tight text-slate-500 bg-white border border-slate-200 rounded-r-xl hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Chart Implementation Script -->
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                
+                // Real data from model
+                const labels = /*[[${chartLabels}]]*/ ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'];
+                const data = /*[[${chartData}]]*/ [65000000, 59000000, 80000000, 81000000, 56000000, 95000000];
+
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+                gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Doanh thu (₫)',
+                            data: data,
+                            borderColor: '#2563eb',
+                            borderWidth: 4,
+                            pointBackgroundColor: '#2563eb',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 6,
+                            pointRadius: 4,
+                            tension: 0.4,
+                            fill: true,
+                            backgroundColor: gradient
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                                ticks: { 
+                                    callback: value => (value / 1000000) + 'Tr',
+                                    font: { family: 'Plus Jakarta Sans', weight: 'bold', size: 10 }
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { family: 'Plus Jakarta Sans', weight: 'bold', size: 10 } }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
     </div>
 </body>
 </html>

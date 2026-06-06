@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Cài đặt hệ thống</h1>
+            <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Quản lý cấu hình cửa hàng và thông tin liên hệ</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Sidebar Settings -->
+            <div class="lg:col-span-1">
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center px-4 py-3 bg-primary-600 text-white rounded-2xl shadow-lg shadow-primary-500/20 font-black text-sm">
+                        <i data-lucide="home" class="w-4 h-4 mr-3"></i> Thông tin chung
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl font-bold text-sm transition-all">
+                        <i data-lucide="shield" class="w-4 h-4 mr-3"></i> Bảo mật & Phân quyền
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl font-bold text-sm transition-all">
+                        <i data-lucide="mail" class="w-4 h-4 mr-3"></i> Cấu hình Email
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl font-bold text-sm transition-all">
+                        <i data-lucide="credit-card" class="w-4 h-4 mr-3"></i> Phương thức thanh toán
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Right: Settings Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm p-8">
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Tên cửa hàng</label>
+                            <input type="text" value="EWMI - Linh Kiện Điện Tử" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Email hỗ trợ</label>
+                                <input type="email" value="support@ewmi.vn" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Số điện thoại</label>
+                                <input type="text" value="1900.xxxx" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Địa chỉ văn phòng</label>
+                            <textarea rows="3" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">128 Trần Quang Khải, P. Tân Định, Quận 1, TP. Hồ Chí Minh</textarea>
+                        </div>
+                        <div class="pt-4 flex justify-end">
+                            <button type="button" class="px-8 py-3 text-sm font-black text-white bg-primary-600 rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/20 transition-all uppercase tracking-wider">Lưu cấu hình</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -9,10 +9,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -23,8 +27,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/linh-kien-may-tinh/**", "/product/**", "/register/**", "/forgot-password/**", "/reset-password/**", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/", "/linh-kien-may-tinh/**", "/product/**", "/register/**", "/forgot-password/**", "/reset-password/**", "/css/**", "/js/**", "/images/**", "/h2-console/**", "/api/**", "/uploads/**").permitAll()
+                .requestMatchers("/admin/audit-logs").hasAuthority("ROLE_SUPER_ADMIN")
+                .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(login -> login
@@ -34,11 +39,10 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
                 .defaultSuccessUrl("/", true)
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .permitAll()
             )
             .rememberMe(rm -> rm
                 .key("uniqueAndSecret")
@@ -47,7 +51,9 @@ public class SecurityConfig {
             .exceptionHandling(ex -> ex
                 .accessDeniedPage("/403") // Khi User truy cập trang Admin
             )
-            .csrf(csrf -> csrf.disable()) // Để dùng H2 console và đơn giản hóa API
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/h2-console/**") // Chỉ bỏ qua cho H2 console nội bộ
+            )
             .headers(headers -> headers.frameOptions(frame -> frame.disable())); // Cho phép H2 console trong iframe
 
         return http.build();

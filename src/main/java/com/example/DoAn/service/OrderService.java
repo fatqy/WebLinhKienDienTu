@@ -50,10 +50,15 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
-            Product product = cartItem.getProduct();
+            // Sử dụng findByIdWithLock để chống Race Condition
+            Product product = productRepository.findByIdWithLock(cartItem.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm " + cartItem.getProduct().getName() + " không còn tồn tại"));
             
+            if (cartItem.getQuantity() <= 0) {
+                throw new RuntimeException("Số lượng sản phẩm " + product.getName() + " trong giỏ hàng không hợp lệ!");
+            }
             if (product.getStock() < cartItem.getQuantity()) {
-                throw new RuntimeException("Sản phẩm " + product.getName() + " không đủ hàng!");
+                throw new RuntimeException("Sản phẩm " + product.getName() + " không đủ hàng (Hiện còn: " + product.getStock() + ")");
             }
 
             product.setStock(product.getStock() - cartItem.getQuantity());
@@ -70,12 +75,25 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
+        if (subtotal <= 0) {
+            throw new RuntimeException("Tổng giá trị đơn hàng phải lớn hơn 0đ!");
+        }
+
         double total = subtotal;
-        // Xử lý Coupon (Yêu cầu B.2)
+        // Xử lý Coupon (Yêu cầu B.2 & Nâng cao: Giới hạn 1 lần dùng/người)
         if (couponCode != null && !couponCode.isEmpty()) {
             Optional<Coupon> couponOpt = couponRepository.findByCode(couponCode);
             if (couponOpt.isPresent()) {
                 Coupon coupon = couponOpt.get();
+                
+                // Kiểm tra xem User đã dùng mã này chưa
+                boolean alreadyUsed = orderRepository.findByUser(user).stream()
+                        .anyMatch(o -> o.getCoupon() != null && o.getCoupon().getId().equals(coupon.getId()) && !"CANCELLED".equals(o.getStatus()));
+                
+                if (alreadyUsed) {
+                    throw new RuntimeException("Bạn đã sử dụng mã giảm giá này cho một đơn hàng khác.");
+                }
+
                 if (coupon.isActive() && (coupon.getExpiryDate() == null || !coupon.getExpiryDate().isBefore(java.time.LocalDate.now()))) {
                     if (subtotal >= coupon.getMinOrderValue()) {
                         double discount = 0;
@@ -85,12 +103,24 @@ public class OrderService {
                             discount = coupon.getDiscountAmount();
                         }
                         total = subtotal - discount;
+                        if (total < 0) {
+                            total = 0;
+                        }
                         order.setCoupon(coupon);
+                    } else {
+                        throw new RuntimeException("Đơn hàng chưa đạt giá trị tối thiểu để áp dụng mã này.");
                     }
+                } else {
+                    throw new RuntimeException("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
                 }
+            } else {
+                throw new RuntimeException("Mã giảm giá không tồn tại.");
             }
         }
 
+        if (total < 0) {
+            total = 0;
+        }
         order.setTotalAmount(total);
         order.setOrderItems(orderItems);
         

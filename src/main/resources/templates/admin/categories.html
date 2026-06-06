@@ -2,66 +2,105 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
 <body>
     <div th:fragment="content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <h2>QUẢN LÝ DANH MỤC</h2>
-            <form th:action="@{/admin/categories/add}" method="post" style="display: flex; gap: 10px;">
-                <input type="text" name="name" placeholder="Tên danh mục mới" required style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                <button type="submit" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px;">+ THÊM</button>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Quản lý danh mục</h1>
+                <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Tổ chức phân loại sản phẩm trên website</p>
+            </div>
+            <form th:action="@{/admin/categories/add}" method="post" class="flex gap-2">
+                <input type="text" name="name" placeholder="Tên danh mục mới" required class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block p-2.5 font-bold outline-none shadow-sm">
+                <button type="submit" class="px-5 py-2.5 text-sm font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all uppercase">
+                    Thêm mới
+                </button>
             </form>
         </div>
 
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên danh mục</th>
-                    <th>Số lượng sản phẩm</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="c : ${categories}">
-                    <td th:text="${c.id}">1</td>
-                    <td th:text="${c.name}" style="font-weight: bold;">Category Name</td>
-                    <td th:text="${c.products != null ? c.products.size() : 0}">0</td>
-                    <td>
-                        <div style="display: flex; gap: 5px;">
-                            <button class="btn-action" style="background: #f39c12; color: white;" 
-                                    th:data-id="${c.id}"
-                                    th:data-name="${c.name}"
-                                    onclick="prepareEditCategory(this)">Sửa</button>
-                            <a th:href="@{/admin/categories/delete/{id}(id=${c.id})}" class="btn-action" 
-                               style="background: var(--primary-red); color: white;" 
-                               onclick="return confirm('Xác nhận xóa danh mục này? Tất cả sản phẩm thuộc danh mục sẽ bị ngắt kết nối.')">Xóa</a>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Edit Category Modal -->
-        <div id="editModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
-            <div style="background: white; width: 400px; margin: 100px auto; padding: 30px; border-radius: 8px;">
-                <h3>Sửa danh mục</h3>
-                <form th:action="@{/admin/categories/edit}" method="post" style="margin-top: 20px;">
-                    <input type="hidden" id="editCategoryId" name="id">
-                    <div class="form-group">
-                        <label>Tên danh mục</label>
-                        <input type="text" id="editCategoryName" name="name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div style="margin-top: 20px; display: flex; gap: 10px;">
-                        <button type="submit" class="btn-action" style="background: #27ae60; color: white; padding: 10px 20px;">CẬP NHẬT</button>
-                        <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="btn-action" style="background: #95a5a6; color: white; padding: 10px 20px;">HỦY</button>
-                    </div>
-                </form>
+        <!-- Categories Table Card -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300">
+                        <tr>
+                            <th class="px-6 py-4 font-black tracking-wider w-20 text-center">ID</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Tên danh mục</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Số lượng SP</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr th:each="c : ${categories}" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+                            <td class="px-6 py-4 text-center font-bold text-slate-400" th:text="${c.id}">1</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mr-3">
+                                        <i data-lucide="folder" class="w-4 h-4"></i>
+                                    </div>
+                                    <span class="font-black text-slate-900 dark:text-white text-base" th:text="${c.name}">Category Name</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-3 py-1 text-xs font-black bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full" th:text="${c.products != null ? c.products.size() : 0}">0</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button class="p-2 text-slate-400 hover:text-amber-500 transition-colors"
+                                            th:data-id="${c.id}"
+                                            th:data-name="${c.name}"
+                                            onclick="prepareEditCategory(this)">
+                                        <i data-lucide="edit-3" class="w-5 h-5"></i>
+                                    </button>
+                                    <a th:href="@{/admin/categories/delete/{id}(id=${c.id})}" class="p-2 text-slate-400 hover:text-red-500 transition-colors" 
+                                       onclick="return confirm('Xác nhận xóa danh mục này? Tất cả sản phẩm thuộc danh mục sẽ bị ngắt kết nối.')">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <script>
+        <!-- Edit Modal -->
+        <div id="editModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-md max-h-full">
+                <div class="relative bg-white rounded-3xl shadow dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between p-6 border-b dark:border-slate-700">
+                        <h3 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Sửa danh mục</h3>
+                        <button type="button" class="text-slate-400 bg-transparent hover:bg-slate-100 hover:text-slate-900 rounded-xl text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-slate-700 dark:hover:text-white" onclick="hideEditModal()">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <form th:action="@{/admin/categories/edit}" method="post" class="p-6 space-y-6">
+                        <input type="hidden" id="editCategoryId" name="id">
+                        <div>
+                            <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Tên danh mục</label>
+                            <input type="text" id="editCategoryName" name="name" required class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold outline-none">
+                        </div>
+                        <div class="pt-2">
+                            <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-black rounded-xl text-sm px-5 py-3 text-center transition-all uppercase tracking-wider shadow-lg shadow-primary-500/20">Cập nhật ngay</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            let editModal;
+            document.addEventListener('DOMContentLoaded', function() {
+                const $targetEl = document.getElementById('editModal');
+                editModal = new Modal($targetEl);
+            });
+
             function prepareEditCategory(btn) {
                 document.getElementById('editCategoryId').value = btn.getAttribute('data-id');
                 document.getElementById('editCategoryName').value = btn.getAttribute('data-name');
-                document.getElementById('editModal').style.display = 'block';
+                editModal.show();
+            }
+
+            function hideEditModal() {
+                editModal.hide();
             }
         </script>
     </div>

@@ -2,40 +2,73 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
 <body>
     <div th:fragment="content">
-        <h2 style="margin-bottom: 25px;">QUẢN LÝ NGƯỜI DÙNG</h2>
-        
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên đăng nhập</th>
-                    <th>Email</th>
-                    <th>Họ và tên</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.id}">1</td>
-                    <td th:text="${user.username}">User</td>
-                    <td th:text="${user.email}">Email</td>
-                    <td th:text="${user.fullName}">Name</td>
-                    <td>
-                        <span th:if="${user.enabled}" style="color: green; font-weight: bold;">Hoạt động</span>
-                        <span th:if="${!user.enabled}" style="color: red; font-weight: bold;">Đã khóa</span>
-                    </td>
-                    <td>
-                        <form th:action="@{/admin/users/toggle-status}" method="post">
-                            <input type="hidden" name="userId" th:value="${user.id}">
-                            <button type="submit" class="btn-action" 
-                                    th:style="${user.enabled ? 'background: #e67e22; color: white;' : 'background: #27ae60; color: white;'}"
-                                    th:text="${user.enabled ? 'Khóa tài khoản' : 'Mở khóa'}">Toggle</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Quản lý người dùng</h1>
+            <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Xem danh sách khách hàng và quản lý trạng thái tài khoản</p>
+        </div>
+
+        <!-- Users Table Card -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300">
+                        <tr>
+                            <th class="px-6 py-4 font-black tracking-wider w-20 text-center">ID</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Thông tin tài khoản</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Email</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Trạng thái</th>
+                            <th sec:authorize="hasAuthority('ROLE_SUPER_ADMIN')" class="px-6 py-4 font-black tracking-wider text-center">Cấp quyền</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr th:each="user : ${users}" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-6 py-4 text-center font-bold text-slate-400" th:text="${user.id}">1</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 mr-3 overflow-hidden border-2 border-slate-50 dark:border-slate-600">
+                                        <img th:src="'https://ui-avatars.com/api/?name=' + ${user.fullName} + '&background=random'" alt="Avatar">
+                                    </div>
+                                    <div>
+                                        <div class="font-black text-slate-900 dark:text-white" th:text="${user.fullName}">Họ tên</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" th:text="${user.username}">Username</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-slate-600 dark:text-slate-300" th:text="${user.email}">Email</td>
+                            <td class="px-6 py-4 text-center">
+                                <span th:if="${user.enabled}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full">Đang hoạt động</span>
+                                <span th:if="${!user.enabled}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Đã khóa</span>
+                            </td>
+                            <td sec:authorize="hasAuthority('ROLE_SUPER_ADMIN')" class="px-6 py-4 text-center">
+                                <form th:if="${user.username != 'superadmin'}" th:action="@{/admin/users/assign-role}" method="post" class="flex items-center justify-center gap-2">
+                                    <input type="hidden" name="userId" th:value="${user.id}">
+                                    <select name="roleName" class="text-xs rounded-lg border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white" onchange="this.form.submit()">
+                                        <option value="ROLE_USER" th:selected="${#lists.contains(user.roles.![name], 'ROLE_USER')}">Khách Hàng</option>
+                                        <option value="ROLE_ADMIN" th:selected="${#lists.contains(user.roles.![name], 'ROLE_ADMIN') && !#lists.contains(user.roles.![name], 'ROLE_SUPER_ADMIN')}">Quản Trị Viên (Admin)</option>
+                                        <option value="ROLE_SUPER_ADMIN" th:selected="${#lists.contains(user.roles.![name], 'ROLE_SUPER_ADMIN')}">Chủ Sở Hữu</option>
+                                    </select>
+                                </form>
+                                <span th:if="${user.username == 'superadmin'}" class="text-xs font-bold text-red-500">Tài Khoản Root</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <form th:if="${user.username != #authentication.name and user.username != 'superadmin'}" th:action="@{/admin/users/toggle-status}" method="post">
+                                    <input type="hidden" name="userId" th:value="${user.id}">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 text-xs font-black rounded-xl transition-all shadow-sm"
+                                            th:classappend="${user.enabled ? 'text-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400'}">
+                                        <i th:data-lucide="${user.enabled ? 'lock' : 'unlock'}" class="w-3.5 h-3.5 mr-2"></i>
+                                        <span th:text="${user.enabled ? 'KHÓA TÀI KHOẢN' : 'MỞ KHÓA'}">Toggle</span>
+                                    </button>
+                                </form>
+                                <span th:if="${user.username == #authentication.name}" class="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-widest dark:bg-slate-700 dark:text-slate-400">Bạn</span>
+                                <span th:if="${user.username == 'superadmin' and user.username != #authentication.name}" class="px-3 py-1 bg-red-100 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-widest dark:bg-red-900/30 dark:text-red-400">Root</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </body>
 </html>

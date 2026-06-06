@@ -2,50 +2,80 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
 <body>
     <div th:fragment="content">
-        <h2 style="margin-bottom: 25px;">QUẢN LÝ ĐÁNH GIÁ</h2>
-        
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Sản phẩm</th>
-                    <th>Người dùng</th>
-                    <th>Đánh giá</th>
-                    <th>Bình luận</th>
-                    <th>Ngày</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="r : ${reviews}">
-                    <td th:text="${r.product.name}">Product</td>
-                    <td th:text="${r.user.username}">User</td>
-                    <td>
-                        <span th:each="i : ${#numbers.sequence(1, r.rating)}" style="color: gold;"><i class="fas fa-star"></i></span>
-                    </td>
-                    <td th:text="${r.comment}">Comment</td>
-                    <td th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy')}">Date</td>
-                    <td>
-                        <span th:if="${r.approved}" style="color: green; font-weight: bold;">Đã duyệt</span>
-                        <span th:if="${!r.approved}" style="color: #f39c12; font-weight: bold;">Chờ duyệt</span>
-                    </td>
-                    <td>
-                        <div style="display: flex; gap: 5px;">
-                            <form th:if="${!r.approved}" th:action="@{/admin/reviews/approve}" method="post">
-                                <input type="hidden" name="reviewId" th:value="${r.id}">
-                                <button type="submit" class="btn-action" style="background: #27ae60; color: white;">Duyệt</button>
-                            </form>
-                            <form th:action="@{/admin/reviews/delete}" method="post">
-                                <input type="hidden" name="reviewId" th:value="${r.id}">
-                                <button type="submit" class="btn-action" style="background: var(--primary-red); color: white;" onclick="return confirm('Xác nhận xóa đánh giá này?')">Xóa</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div th:if="${#lists.isEmpty(reviews)}" style="text-align: center; padding: 50px; color: #999;">
-            Chưa có đánh giá nào từ khách hàng.
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Quản lý đánh giá</h1>
+            <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Kiểm duyệt và phản hồi bình luận từ khách hàng</p>
+        </div>
+
+        <!-- Reviews Table Card -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300">
+                        <tr>
+                            <th class="px-6 py-4 font-black tracking-wider">Khách hàng & Sản phẩm</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Đánh giá</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Nội dung bình luận</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Trạng thái</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(reviews)}">
+                            <td colspan="5" class="px-6 py-20 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i data-lucide="message-square-off" class="w-12 h-12 text-slate-300 mb-4"></i>
+                                    <p class="text-lg font-black text-slate-400">Chưa có đánh giá nào từ khách hàng</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Data Row -->
+                        <tr th:each="r : ${reviews}" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="mb-1">
+                                    <span class="font-black text-slate-900 dark:text-white" th:text="${r.user.fullName}">Khách hàng</span>
+                                    <span class="ml-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest" th:text="${' • ' + #temporals.format(r.createdAt, 'dd/MM/yyyy')}">Date</span>
+                                </div>
+                                <div class="text-xs font-bold text-primary-600 dark:text-primary-400 truncate max-w-[200px]" th:text="${r.product.name}">Tên sản phẩm</div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex justify-center items-center gap-0.5 text-lg">
+                                    <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                          th:class="${i <= r.rating ? 'text-amber-400' : 'text-slate-200'}">★</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-slate-600 dark:text-slate-300 font-medium italic italic leading-relaxed" th:text="${'“' + r.comment + '”'}">Bình luận</p>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span th:if="${r.approved}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full">Đã duyệt</span>
+                                <span th:if="${!r.approved}" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">Chờ duyệt</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <form th:action="@{/admin/reviews/toggle}" method="post">
+                                        <input type="hidden" name="reviewId" th:value="${r.id}">
+                                        <button type="submit" th:if="${!r.approved}" title="Hiện đánh giá này" class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all">
+                                            <i data-lucide="eye" class="w-5 h-5"></i>
+                                        </button>
+                                        <button type="submit" th:if="${r.approved}" title="Ẩn đánh giá này" class="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-all">
+                                            <i data-lucide="eye-off" class="w-5 h-5"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/admin/reviews/delete}" method="post">
+                                        <input type="hidden" name="reviewId" th:value="${r.id}">
+                                        <button type="submit" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" onclick="return confirm('Xác nhận xóa đánh giá này?')">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </body>

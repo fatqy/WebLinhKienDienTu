@@ -6,6 +6,7 @@ import com.example.DoAn.model.FilterGroup;
 import com.example.DoAn.model.Product;
 import com.example.DoAn.repository.CategoryRepository;
 import com.example.DoAn.repository.ProductRepository;
+import com.example.DoAn.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.DoAn.model.User;
+import com.example.DoAn.model.Order;
 import com.example.DoAn.model.PasswordResetToken;
 import com.example.DoAn.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +38,9 @@ public class ProductController {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
     // Tự động thêm categories và imageAssets vào mọi trang
     @ModelAttribute("categories")
     public List<Category> populateCategories() {
@@ -55,17 +60,28 @@ public class ProductController {
                                    @RequestParam(required = false) Double minPrice,
                                    @RequestParam(required = false) Double maxPrice,
                                    @RequestParam(required = false) String sort) {
-        List<Product> products = productRepository.findAll();
         
-        // Lấy danh sách thương hiệu duy nhất (trước khi lọc)
-        List<String> allBrands = products.stream()
+        // Giá trị mặc định cho lọc giá
+        double min = (minPrice != null) ? minPrice : 0;
+        double max = (maxPrice != null) ? maxPrice : 999_999_999;
+
+        // Thực hiện lọc tại Database
+        List<Product> products = productRepository.findByFilters(null, null, min, max);
+        
+        // Lấy danh sách thương hiệu duy nhất
+        List<String> allBrands = productRepository.findAll().stream()
                 .map(Product::getBrand)
                 .filter(b -> b != null && !b.isEmpty())
                 .distinct()
                 .collect(java.util.stream.Collectors.toList());
         model.addAttribute("allBrands", allBrands);
 
-        applyFiltersAndSort(products, brands, minPrice, maxPrice, sort);
+        // Lọc thương hiệu bằng Java do JPQL không hỗ trợ tốt Collection NULL
+        if (brands != null && !brands.isEmpty()) {
+            products.removeIf(p -> p.getBrand() == null || !brands.contains(p.getBrand()));
+        }
+
+        applySort(products, sort);
 
         model.addAttribute("products", products);
         model.addAttribute("minPrice", minPrice);
@@ -83,17 +99,25 @@ public class ProductController {
                                @RequestParam(required = false) Double maxPrice,
                                @RequestParam(required = false) String sort) {
         Category category = categoryRepository.findById(id).orElseThrow();
-        List<Product> products = new ArrayList<>(category.getProducts());
+        double min = (minPrice != null) ? minPrice : 0;
+        double max = (maxPrice != null) ? maxPrice : 999_999_999;
+
+        // Thực hiện lọc tại Database
+        List<Product> products = productRepository.findByFilters(null, id, min, max);
         
         // Lấy danh sách thương hiệu trong danh mục này
-        List<String> allBrands = products.stream()
+        List<String> allBrands = productRepository.findByCategoryName(category.getName()).stream()
                 .map(Product::getBrand)
                 .filter(b -> b != null && !b.isEmpty())
                 .distinct()
                 .collect(java.util.stream.Collectors.toList());
         model.addAttribute("allBrands", allBrands);
 
-        applyFiltersAndSort(products, brands, minPrice, maxPrice, sort);
+        if (brands != null && !brands.isEmpty()) {
+            products.removeIf(p -> p.getBrand() == null || !brands.contains(p.getBrand()));
+        }
+
+        applySort(products, sort);
 
         model.addAttribute("products", products);
         model.addAttribute("currentCategory", category.getName());
@@ -106,14 +130,6 @@ public class ProductController {
         return "linh-kien-may-tinh";
     }
 
-    @GetMapping("/api/products/suggestions")
-    @org.springframework.web.bind.annotation.ResponseBody
-    public List<Product> getSuggestions(@RequestParam String q) {
-        List<Product> list = productRepository.findByNameContainingIgnoreCase(q);
-        // Trả về tối đa 5 gợi ý để dropdown gọn đẹp
-        return list.size() > 5 ? list.subList(0, 5) : list;
-    }
-
     @GetMapping("/search")
     public String search(@RequestParam String q, Model model,
                         @RequestParam(required = false) Long categoryId,
@@ -122,20 +138,22 @@ public class ProductController {
                         @RequestParam(required = false) Double maxPrice,
                         @RequestParam(required = false) String sort) {
         
-        List<Product> results;
+        double min = (minPrice != null) ? minPrice : 0;
+        double max = (maxPrice != null) ? maxPrice : 999_999_999;
+
+        // Tìm kiếm và lọc toàn bộ tại Database
+        List<Product> results = productRepository.findByFilters(q, categoryId, min, max);
+
         if (categoryId != null) {
-            // Tìm kiếm trong danh mục cụ thể
-            results = productRepository.findByNameContainingIgnoreCase(q).stream()
-                    .filter(p -> p.getCategory() != null && p.getCategory().getId().equals(categoryId))
-                    .collect(java.util.stream.Collectors.toList());
             model.addAttribute("currentCategory", categoryRepository.findById(categoryId).get().getName());
             model.addAttribute("categoryId", categoryId);
-        } else {
-            // Tìm kiếm toàn hệ thống
-            results = productRepository.findByNameContainingIgnoreCase(q);
         }
 
-        applyFiltersAndSort(results, brands, minPrice, maxPrice, sort);
+        if (brands != null && !brands.isEmpty()) {
+            results.removeIf(p -> p.getBrand() == null || !brands.contains(p.getBrand()));
+        }
+
+        applySort(results, sort);
 
         model.addAttribute("products", results);
         model.addAttribute("searchQuery", q);
@@ -146,7 +164,6 @@ public class ProductController {
 
         // Gợi ý sản phẩm thông minh
         if (!results.isEmpty()) {
-            // Lấy danh mục của kết quả đầu tiên làm chuẩn gợi ý
             Category targetCat = results.get(0).getCategory();
             if (targetCat != null) {
                 List<Product> suggestions = productRepository.findByCategoryName(targetCat.getName());
@@ -161,22 +178,20 @@ public class ProductController {
         return "linh-kien-may-tinh";
     }
 
-    // Helper: Áp dụng lọc sản phẩm và sắp xếp (Yêu cầu C.1 & C.2)
-    private void applyFiltersAndSort(List<Product> products, List<String> brands, Double minPrice, Double maxPrice, String sort) {
-        // Lọc thương hiệu (Đa điều kiện)
-        if (brands != null && !brands.isEmpty()) {
-            products.removeIf(p -> p.getBrand() == null || !brands.contains(p.getBrand()));
+    @GetMapping("/api/products/suggestions")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public List<Product> getSuggestions(@RequestParam String q) {
+        if (q == null || q.trim().isEmpty()) {
+            return Collections.emptyList();
         }
-        
-        // Lọc giá
-        if (minPrice != null) {
-            products.removeIf(p -> (p.getSalePrice() > 0 ? p.getSalePrice() : p.getOriginalPrice()) < minPrice);
-        }
-        if (maxPrice != null) {
-            products.removeIf(p -> (p.getSalePrice() > 0 ? p.getSalePrice() : p.getOriginalPrice()) > maxPrice);
-        }
+        // findByNameContainingIgnoreCase hỗ trợ không phân biệt hoa thường
+        List<Product> list = productRepository.findByNameContainingIgnoreCase(q.trim());
+        // Trả về tối đa 10 gợi ý
+        return list.size() > 10 ? list.subList(0, 10) : list;
+    }
 
-        // Sắp xếp (Yêu cầu C.2)
+    // Helper: Chỉ còn nhiệm vụ sắp xếp (Yêu cầu C.2)
+    private void applySort(List<Product> products, String sort) {
         if (sort != null) {
             switch (sort) {
                 case "price-asc":
@@ -209,10 +224,31 @@ public class ProductController {
     public String getProductDetail(@PathVariable Long id, Model model) {
         Product product = productRepository.findById(id).orElseThrow();
         model.addAttribute("product", product);
+        
+        // Filter only approved reviews
+        model.addAttribute("approvedReviews", product.getReviews().stream().filter(r -> r.isApproved()).collect(Collectors.toList()));
+
         // Lấy sản phẩm cùng loại, loại bỏ chính nó
         List<Product> related = productRepository.findByCategoryName(product.getCategory().getName());
         related.removeIf(p -> p.getId().equals(id));
         model.addAttribute("relatedProducts", related);
+
+        // Check canReview
+        boolean canReview = false;
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+            User user = userService.findByUsername(auth.getName()).orElse(null);
+            if (user != null) {
+                // Kiểm tra user đã mua sp này và đơn hoàn thành
+                List<Order> orders = orderRepository.findByUser(user);
+                canReview = orders.stream()
+                        .filter(o -> "COMPLETED".equals(o.getStatus()))
+                        .flatMap(o -> o.getOrderItems().stream())
+                        .anyMatch(item -> item.getProduct().getId().equals(id));
+            }
+        }
+        model.addAttribute("canReview", canReview);
+
         return "product-detail";
     }
 

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Arrays;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -41,8 +42,25 @@ public class DataInitializer implements CommandLineRunner {
         if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
             roleRepository.save(new Role("ROLE_ADMIN"));
         }
+        if (roleRepository.findByName("ROLE_SUPER_ADMIN").isEmpty()) {
+            roleRepository.save(new Role("ROLE_SUPER_ADMIN"));
+        }
         if (roleRepository.findByName("ROLE_USER").isEmpty()) {
             roleRepository.save(new Role("ROLE_USER"));
+        }
+
+        // 2. Khởi tạo Super Admin
+        if (userRepository.findByUsername("superadmin").isEmpty()) {
+            User superAdmin = new User();
+            superAdmin.setUsername("superadmin");
+            superAdmin.setPassword(passwordEncoder.encode("superadmin"));
+            superAdmin.setEmail("superadmin@ewmi.com");
+            superAdmin.setFullName("Chủ Sở Hữu");
+            superAdmin.setRoles(new HashSet<>(Arrays.asList(
+                roleRepository.findByName("ROLE_ADMIN").get(),
+                roleRepository.findByName("ROLE_SUPER_ADMIN").get()
+            )));
+            userRepository.save(superAdmin);
         }
 
         // 2. Khởi tạo Admin

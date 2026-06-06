@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Báo cáo & Thống kê</h1>
+            <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Phân tích chuyên sâu về hiệu quả kinh doanh</p>
+        </div>
+
+        <!-- Summary Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400">
+                        <i data-lucide="package" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <h3 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Tổng sản phẩm</h3>
+                <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white" th:text="${productCount}">0</p>
+            </div>
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl text-emerald-600 dark:text-emerald-400">
+                        <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <h3 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Tổng đơn hàng</h3>
+                <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white" th:text="${orderCount}">0</p>
+            </div>
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-2xl text-amber-600 dark:text-amber-400">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <h3 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Khách hàng</h3>
+                <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white" th:text="${customerCount}">0</p>
+            </div>
+            <div class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-red-50 dark:bg-red-900/30 rounded-2xl text-red-600 dark:text-red-400">
+                        <i data-lucide="banknote" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <h3 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Doanh thu</h3>
+                <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white" th:text="${#numbers.formatDecimal(revenue, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</p>
+            </div>
+        </div>
+
+        <!-- Charts Placeholder -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="p-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <h3 class="text-lg font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight">Cơ cấu danh mục</h3>
+                <div class="flex flex-col items-center justify-center h-[300px]">
+                    <i data-lucide="pie-chart" class="w-16 h-16 text-slate-200 mb-4"></i>
+                    <p class="text-slate-400 font-bold italic">Đang thu thập dữ liệu phân tích...</p>
+                </div>
+            </div>
+            <div class="p-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <h3 class="text-lg font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight">Tăng trưởng khách hàng</h3>
+                <div class="flex flex-col items-center justify-center h-[300px]">
+                    <i data-lucide="trending-up" class="w-16 h-16 text-slate-200 mb-4"></i>
+                    <p class="text-slate-400 font-bold italic">Đang tính toán tỷ lệ chuyển đổi...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

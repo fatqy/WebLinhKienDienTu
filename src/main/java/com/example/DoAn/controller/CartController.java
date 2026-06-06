@@ -29,21 +29,43 @@ public class CartController {
 
     @PostMapping("/add")
     public String addToCart(@RequestParam Long productId, @RequestParam int quantity, Authentication authentication) {
+        if(authentication == null) return "redirect:/login";
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         cartService.addToCart(user, productId, quantity);
         return "redirect:/cart";
     }
 
+    @PostMapping("/api/add")
+    @ResponseBody
+    public String addToCartApi(@RequestParam Long productId, @RequestParam int quantity, Authentication authentication) {
+        if (authentication == null) {
+            return "unauthorized";
+        }
+        try {
+            User user = userService.findByUsername(authentication.getName()).orElseThrow();
+            cartService.addToCart(user, productId, quantity);
+            return "success";
+        } catch (Exception e) {
+            return "error";
+        }
+    }
+
     @GetMapping("/remove/{id}")
-    public String removeFromCart(@PathVariable Long id) {
-        cartService.removeFromCart(id);
+    public String removeFromCart(@PathVariable Long id, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElseThrow();
+        cartService.removeFromCart(id, user);
         return "redirect:/cart";
     }
 
     @PostMapping("/update")
     @ResponseBody
-    public String updateCart(@RequestParam Long id, @RequestParam int quantity) {
-        cartService.updateQuantity(id, quantity);
-        return "success";
+    public String updateCart(@RequestParam Long id, @RequestParam int quantity, Authentication authentication) {
+        try {
+            User user = userService.findByUsername(authentication.getName()).orElseThrow();
+            cartService.updateQuantity(id, quantity, user);
+            return "success";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }

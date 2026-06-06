@@ -11,7 +11,7 @@ public class ImageAssets {
 
     // --- Banner & Logo (Sử dụng Getter để Thymeleaf truy cập dễ dàng) ---
     private final String logo = "https://gearvn.com/cdn/shop/files/logo-gearvn.png?v=1614324700";
-    private final String bannerHome = "https://theme.hstatic.net/200000722513/1001090675/14/slideshow_1.jpg?v=6840";
+    private final String bannerHome = "blob:https://gemini.google.com/f4a672ad-bc0c-40c2-9712-566848e49a18";
     
     public String getLogo() { return logo; }
     public String getBannerHome() { return bannerHome; }
@@ -28,7 +28,9 @@ public class ImageAssets {
         PRODUCT_IMAGES.put("Laptop Gaming ASUS ROG Strix G16", "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTXuUtTMRm2wifVO-Qx2KGTklro4PRyAFtgzZ40mgsZkVecGDpQK4PbBnsu5ndrkEP7sLm6aTOwe_vY8VyS4pjctBgmG6kk83feTPx1IyVv1SvJalqj5HqV8sDNJqMZzEzYAzUq0HQgIw&usqp=CAc");
         PRODUCT_IMAGES.put("Laptop MSI Katana 15 B13V", "https://i.pinimg.com/736x/1d/82/bf/1d82bf6a34cbbc8c9f7eedd73771245c.jpg");
         PRODUCT_IMAGES.put("Laptop Acer Predator Helios Neo 16", "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRT9JoUhTwBwNFSQqbX3DcdzNPpBEWSfsg0Pxl7RVJr2RdNTDJ4vKo_Sq7bzgiaFFwuAxohYKg86Qfec_vqpYMT_gTRw5UHQ4JNoimWXqV4ca2Kapxo7-pDWyYeZAnBMHvbIE5KdCU7Kw&usqp=CAc");
-
+        PRODUCT_IMAGES.put("Màn hình ASUS ROG Swift PG279QM", "https://dlcdnwebimgs.asus.com/gain/72C16A36-4EE3-4AC4-A58A-35F6B8A2FB6F/w717/h525/fwebp");
+        PRODUCT_IMAGES.put("Màn hình Samsung Odyssey G7", "https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/m/h/mhv_1_14.png");
+        PRODUCT_IMAGES.put("Màn hình LG UltraGear 27GP850-B","https://cdn2.cellphones.com.vn/insecure/rs:fill:0:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/t/e/text_ng_n_5__10_61.png");
         // --- VGA ---
         PRODUCT_IMAGES.put("ASUS ROG Strix GeForce RTX 4090 OC 24GB", "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRXuYmnFkWcDdedeee9rWDMMvvGY40b9kS9d_UCiW1WEnByYaXUWXSGXAducFeX6Yd8BoDOSBwM8on8rvLZ0LFT8LB-2yX2woBCi8QukbaiL5mArx4O0bgeBJBEUq8lfodOw12eEMk8gw&usqp=CAc");
         PRODUCT_IMAGES.put("MSI GeForce RTX 4080 SUPER EXPERT 16G", "https://i.pinimg.com/1200x/c1/b3/8e/c1b38e9e5891c6651696b9d01b0855a1.jpg");

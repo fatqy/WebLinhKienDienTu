@@ -77,18 +77,26 @@
         </div>
     </main>
 
-    <script>
+    <script th:inline="javascript">
         function updateQuantity(id, quantity) {
             if (quantity < 1) return;
             const formData = new FormData();
             formData.append('id', id);
             formData.append('quantity', quantity);
+            
+            // Add CSRF token
+            const csrfParam = /*[[${_csrf.parameterName}]]*/ '_csrf';
+            const csrfToken = /*[[${_csrf.token}]]*/ '';
+            formData.append(csrfParam, csrfToken);
+
             fetch('/cart/update', {
                 method: 'POST',
                 body: formData
             }).then(response => {
                 if (response.ok) {
                     location.reload();
+                } else {
+                    alert('Lỗi cập nhật giỏ hàng. Vui lòng thử lại.');
                 }
             });
         }

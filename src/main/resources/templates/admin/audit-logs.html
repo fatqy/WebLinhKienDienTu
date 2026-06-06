@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::main})}">
+<head>
+    <title>Nhật ký hệ thống</title>
+</head>
+<body>
+<main class="w-full">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Nhật ký Hệ thống (Audit Logs)</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Bảo mật: Chỉ Super Admin mới có quyền xem trang này.</p>
+        </div>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <tr>
+                        <th class="px-6 py-5 font-black tracking-wider">Thời gian</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Admin & IP</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Hành động</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Đối tượng</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                    <tr th:each="log : ${logs}" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-slate-500 dark:text-slate-400 font-medium" 
+                            th:text="${#temporals.format(log.timestamp, 'HH:mm:ss dd/MM/yyyy')}">
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900 dark:text-white" th:text="${log.username}"></div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-mono" th:text="${log.ipAddress}"></div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span th:if="${log.action == 'ADD'}" class="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg font-bold text-xs">CREATE</span>
+                            <span th:if="${log.action == 'UPDATE'}" class="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg font-bold text-xs">UPDATE</span>
+                            <span th:if="${log.action == 'DELETE'}" class="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg font-bold text-xs">DELETE</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300 font-bold" th:text="${log.entityName + ' #' + log.entityId}"></td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 max-w-md truncate" th:text="${log.details}" th:title="${log.details}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(logs)}">
+                        <td colspan="5" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mb-3"></i>
+                                <p class="text-sm font-medium">Chưa có bản ghi hoạt động nào.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

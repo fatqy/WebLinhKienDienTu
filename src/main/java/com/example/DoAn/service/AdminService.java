@@ -63,4 +63,24 @@ public class AdminService {
                 .limit(10)
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    public List<Double> getRevenueLast6Months() {
+        List<Double> revenues = new java.util.ArrayList<>();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        for (int i = 5; i >= 0; i--) {
+            java.time.LocalDateTime monthDate = now.minusMonths(i);
+            revenues.add(calculateRevenueByMonth(monthDate.getMonthValue(), monthDate.getYear()));
+        }
+        return revenues;
+    }
+
+    public List<String> getLabelsLast6Months() {
+        List<String> labels = new java.util.ArrayList<>();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        for (int i = 5; i >= 0; i--) {
+            java.time.LocalDateTime monthDate = now.minusMonths(i);
+            labels.add("Tháng " + monthDate.getMonthValue());
+        }
+        return labels;
+    }
 }
