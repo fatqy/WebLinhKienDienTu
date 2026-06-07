@@ -46,7 +46,7 @@ public class CartController {
             cartService.addToCart(user, productId, quantity);
             return "success";
         } catch (Exception e) {
-            return "error";
+            return e.getMessage();
         }
     }
 
@@ -67,5 +67,41 @@ public class CartController {
         } catch (Exception e) {
             return e.getMessage();
         }
+    }
+
+    @GetMapping("/api/items")
+    @ResponseBody
+    public java.util.Map<String, Object> getCartItemsApi(Authentication authentication) {
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            response.put("items", new java.util.ArrayList<>());
+            response.put("total", 0);
+            return response;
+        }
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user == null) {
+            response.put("items", new java.util.ArrayList<>());
+            response.put("total", 0);
+            return response;
+        }
+        
+        java.util.List<com.example.DoAn.model.CartItem> items = cartService.getCartItems(user);
+        double total = cartService.calculateTotal(user);
+        
+        java.util.List<java.util.Map<String, Object>> itemsList = new java.util.ArrayList<>();
+        for (com.example.DoAn.model.CartItem item : items) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", item.getId());
+            map.put("productName", item.getProduct().getName());
+            map.put("productImage", item.getProduct().getImageUrl());
+            double price = item.getProduct().getSalePrice() > 0 ? item.getProduct().getSalePrice() : item.getProduct().getOriginalPrice();
+            map.put("price", price);
+            map.put("quantity", item.getQuantity());
+            itemsList.add(map);
+        }
+        
+        response.put("items", itemsList);
+        response.put("total", total);
+        return response;
     }
 }

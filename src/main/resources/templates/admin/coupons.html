@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+<body>
+    <div th:fragment="content">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Quản lý Mã giảm giá</h1>
+                <p class="text-sm font-bold text-slate-500 dark:text-slate-400">Tạo và quản lý các chương trình khuyến mãi (Coupons)</p>
+            </div>
+            <button type="button" onclick="showAddModal()" class="px-5 py-2.5 text-sm font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all uppercase">
+                + Tạo mã mới
+            </button>
+        </div>
+
+        <!-- Coupons Table Card -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300">
+                        <tr>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">ID</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Mã (Code)</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Giảm giá</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Đơn tối thiểu</th>
+                            <th class="px-6 py-4 font-black tracking-wider">Hạn sử dụng</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Trạng thái</th>
+                            <th class="px-6 py-4 font-black tracking-wider text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr th:each="c : ${coupons}" class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+                            <td class="px-6 py-4 text-center font-bold text-slate-400" th:text="${c.id}">1</td>
+                            <td class="px-6 py-4">
+                                <span class="font-black text-slate-900 dark:text-white px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-700 uppercase" th:text="${c.code}">CODE</span>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">
+                                <span th:if="${c.discountType == 'FIXED'}" th:text="${#numbers.formatDecimal(c.discountAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                                <span th:if="${c.discountType == 'PERCENTAGE'}" th:text="${#numbers.formatDecimal(c.discountAmount, 0, 'COMMA', 0, 'POINT')} + '%'"></span>
+                            </td>
+                            <td class="px-6 py-4 font-medium" th:text="${#numbers.formatDecimal(c.minOrderValue, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
+                            <td class="px-6 py-4">
+                                <span th:if="${c.expiryDate != null}" th:text="${#temporals.format(c.expiryDate, 'dd/MM/yyyy')}"></span>
+                                <span th:if="${c.expiryDate == null}" class="text-slate-400 italic">Vô thời hạn</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span th:if="${c.active}" class="px-3 py-1 text-xs font-black bg-emerald-100 text-emerald-700 rounded-full">Hoạt động</span>
+                                <span th:if="${!c.active}" class="px-3 py-1 text-xs font-black bg-rose-100 text-rose-700 rounded-full">Đã tắt</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button class="p-2 text-slate-400 hover:text-amber-500 transition-colors"
+                                            th:data-id="${c.id}"
+                                            th:data-code="${c.code}"
+                                            th:data-amount="${c.discountAmount}"
+                                            th:data-type="${c.discountType}"
+                                            th:data-min="${c.minOrderValue}"
+                                            th:data-expiry="${c.expiryDate}"
+                                            th:data-active="${c.active}"
+                                            onclick="prepareEditCoupon(this)">
+                                        <i data-lucide="edit-3" class="w-5 h-5"></i>
+                                    </button>
+                                    <a th:href="@{/admin/coupons/delete/{id}(id=${c.id})}" class="p-2 text-slate-400 hover:text-red-500 transition-colors" 
+                                       onclick="return confirm('Xác nhận xóa mã giảm giá này?')">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(coupons)}">
+                            <td colspan="7" class="px-6 py-8 text-center text-slate-500">Chưa có mã giảm giá nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add/Edit Modal -->
+        <div id="couponModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-xl max-h-full">
+                <div class="relative bg-white rounded-3xl shadow dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between p-6 border-b dark:border-slate-700">
+                        <h3 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight" id="modalTitle">Tạo mã giảm giá</h3>
+                        <button type="button" class="text-slate-400 bg-transparent hover:bg-slate-100 hover:text-slate-900 rounded-xl text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-slate-700 dark:hover:text-white" onclick="hideCouponModal()">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <form id="couponForm" th:action="@{/admin/coupons/add}" method="post" class="p-6 space-y-4">
+                        <input type="hidden" id="couponId" name="id">
+                        
+                        <div>
+                            <label class="block mb-2 text-xs font-black text-slate-900 dark:text-slate-300 uppercase tracking-widest">Mã giảm giá (Code)</label>
+                            <input type="text" id="couponCode" name="code" required placeholder="Ví dụ: TET2026" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 font-bold uppercase outline-none">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block mb-2 text-xs font-black text-slate-900 uppercase tracking-widest">Loại giảm giá</label>
+                                <select id="discountType" name="discountType" required class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 font-bold outline-none">
+                                    <option value="PERCENTAGE">Theo phần trăm (%)</option>
+                                    <option value="FIXED">Số tiền cố định (VNĐ)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-xs font-black text-slate-900 uppercase tracking-widest">Mức giảm</label>
+                                <input type="number" id="discountAmount" name="discountAmount" required min="1" step="0.01" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 font-bold outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-xs font-black text-slate-900 uppercase tracking-widest">Giá trị đơn hàng tối thiểu (VNĐ)</label>
+                            <input type="number" id="minOrderValue" name="minOrderValue" required min="0" value="0" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 font-bold outline-none">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 items-center">
+                            <div>
+                                <label class="block mb-2 text-xs font-black text-slate-900 uppercase tracking-widest">Hạn sử dụng</label>
+                                <input type="date" id="expiryDate" name="expiryDate" class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3 font-bold outline-none">
+                            </div>
+                            <div class="flex items-center mt-6">
+                                <input type="checkbox" id="active" name="active" checked class="w-5 h-5 text-primary-600 bg-slate-100 border-slate-300 rounded focus:ring-primary-500">
+                                <label for="active" class="ml-2 text-sm font-black text-slate-900">Kích hoạt mã</label>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-200">
+                            <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-black rounded-xl text-sm px-5 py-3 text-center transition-all uppercase tracking-wider shadow-lg shadow-primary-500/20">Lưu thông tin</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            let cModal;
+            document.addEventListener('DOMContentLoaded', function() {
+                const $targetEl = document.getElementById('couponModal');
+                cModal = new Modal($targetEl);
+            });
+
+            function showAddModal() {
+                document.getElementById('modalTitle').innerText = 'Tạo mã giảm giá';
+                document.getElementById('couponForm').action = '/admin/coupons/add';
+                document.getElementById('couponId').value = '';
+                document.getElementById('couponCode').value = '';
+                document.getElementById('discountAmount').value = '';
+                document.getElementById('discountType').value = 'PERCENTAGE';
+                document.getElementById('minOrderValue').value = '0';
+                document.getElementById('expiryDate').value = '';
+                document.getElementById('active').checked = true;
+                cModal.show();
+            }
+
+            function prepareEditCoupon(btn) {
+                document.getElementById('modalTitle').innerText = 'Sửa mã giảm giá';
+                document.getElementById('couponForm').action = '/admin/coupons/edit';
+                document.getElementById('couponId').value = btn.getAttribute('data-id');
+                document.getElementById('couponCode').value = btn.getAttribute('data-code');
+                document.getElementById('discountAmount').value = btn.getAttribute('data-amount');
+                document.getElementById('discountType').value = btn.getAttribute('data-type');
+                document.getElementById('minOrderValue').value = btn.getAttribute('data-min');
+                document.getElementById('expiryDate').value = btn.getAttribute('data-expiry') || '';
+                document.getElementById('active').checked = btn.getAttribute('data-active') === 'true';
+                cModal.show();
+            }
+
+            function hideCouponModal() {
+                cModal.hide();
+            }
+        </script>
+    </div>
+</body>
+</html>

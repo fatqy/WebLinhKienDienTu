@@ -57,6 +57,64 @@ public class AdminController {
     @Autowired
     private com.example.DoAn.repository.RoleRepository roleRepository;
 
+    @Autowired
+    private com.example.DoAn.repository.OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private com.example.DoAn.repository.CartItemRepository cartItemRepository;
+
+    @Autowired
+    private com.example.DoAn.repository.CouponRepository couponRepository;
+
+    // --- QUẢN LÝ MÃ GIẢM GIÁ (COUPONS) ---
+    @GetMapping("/coupons")
+    public String listCoupons(Model model) {
+        model.addAttribute("coupons", couponRepository.findAll());
+        return "admin/coupons";
+    }
+
+    @PostMapping("/coupons/add")
+    public String addCoupon(@ModelAttribute Coupon coupon, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            couponRepository.save(coupon);
+            auditLogService.logAction("ADD", "COUPON", coupon.getCode(), "Thêm mã giảm giá mới: " + coupon.getCode());
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm mã giảm giá thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: Mã giảm giá có thể đã tồn tại!");
+        }
+        return "redirect:/admin/coupons";
+    }
+
+    @PostMapping("/coupons/edit")
+    public String editCoupon(@ModelAttribute Coupon coupon, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            Coupon existing = couponRepository.findById(coupon.getId()).orElseThrow();
+            existing.setCode(coupon.getCode());
+            existing.setDiscountAmount(coupon.getDiscountAmount());
+            existing.setDiscountType(coupon.getDiscountType());
+            existing.setMinOrderValue(coupon.getMinOrderValue());
+            existing.setExpiryDate(coupon.getExpiryDate());
+            existing.setActive(coupon.isActive());
+            couponRepository.save(existing);
+            auditLogService.logAction("UPDATE", "COUPON", coupon.getCode(), "Cập nhật mã giảm giá: " + coupon.getCode());
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật mã giảm giá thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/coupons";
+    }
+
+    @GetMapping("/coupons/delete/{id}")
+    public String deleteCoupon(@PathVariable Long id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        Coupon coupon = couponRepository.findById(id).orElse(null);
+        if (coupon != null) {
+            couponRepository.delete(coupon);
+            auditLogService.logAction("DELETE", "COUPON", coupon.getCode(), "Xóa mã giảm giá: " + coupon.getCode());
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa mã giảm giá!");
+        }
+        return "redirect:/admin/coupons";
+    }
+
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -230,6 +288,9 @@ public class AdminController {
     }
 
     private void validateProduct(Product product) {
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            throw new RuntimeException("Tên sản phẩm không được để trống!");
+        }
         if (product.getOriginalPrice() < 0) {
             throw new RuntimeException("Giá gốc không được nhỏ hơn 0đ!");
         }
@@ -245,12 +306,23 @@ public class AdminController {
     }
 
     @GetMapping("/products/delete/{id}")
-    public String deleteProduct(@PathVariable Long id) {
-        Product p = productRepository.findById(id).orElse(null);
-        if(p != null) {
-            String pName = p.getName();
-            productRepository.deleteById(id);
-            auditLogService.logAction("DELETE", "PRODUCT", id.toString(), "Xóa sản phẩm: " + pName);
+    @org.springframework.transaction.annotation.Transactional
+    public String deleteProduct(@PathVariable Long id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            Product p = productRepository.findById(id).orElse(null);
+            if(p != null) {
+                String pName = p.getName();
+                
+                // Xóa luôn: xóa tất cả các giỏ hàng và chi tiết đơn hàng đang chứa sản phẩm này
+                cartItemRepository.deleteByProductId(id);
+                orderItemRepository.deleteByProductId(id);
+                
+                productRepository.deleteById(id);
+                auditLogService.logAction("DELETE", "PRODUCT", id.toString(), "Xóa sản phẩm (ép xóa): " + pName);
+                redirectAttributes.addFlashAttribute("successMessage", "Xóa sản phẩm thành công (đã gỡ khỏi các đơn hàng cũ)!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi xóa sản phẩm: " + e.getMessage());
         }
         return "redirect:/admin/products";
     }

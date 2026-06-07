@@ -22,6 +22,10 @@
             <div class="checkout-container">
                 <div class="checkout-form">
                     <form th:action="@{/checkout}" method="post">
+                        <div th:if="${errorMessage}" style="background: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold;">
+                            <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+                        </div>
+                        
                         <div class="form-section">
                             <h3>Thông tin giao hàng</h3>
                             <div class="form-group">
@@ -41,10 +45,19 @@
                         <div class="form-section" style="margin-top: 30px;">
                             <h3>Phương thức thanh toán</h3>
                             <div class="form-group">
-                                <select name="paymentMethod">
+                                <select name="paymentMethod" id="paymentMethodSelect">
                                     <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                    <option value="E-WALLET">Ví điện tử / Chuyển khoản</option>
+                                    <option value="E-WALLET">Ví điện tử / Chuyển khoản (Mã QR)</option>
                                 </select>
+                            </div>
+                            
+                            <!-- QR Code Section (Hidden by default) -->
+                            <div id="qrCodeSection" style="display: none; background: #fff; padding: 20px; border-radius: 12px; text-align: center; margin-top: 15px; color: #333;">
+                                <p style="font-weight: bold; margin-bottom: 10px; color: #d70018;">Quét mã QR qua ứng dụng Ngân hàng/Ví điện tử</p>
+                                <img id="vietqr-img" src="" alt="Mã QR Thanh Toán" style="width: 250px; height: 250px; margin: 0 auto; border: 1px solid #eee; border-radius: 8px;">
+                                <p style="margin-top: 10px; font-size: 14px;">Chủ tài khoản: <strong>CONG TY EWMI</strong></p>
+                                <p style="font-size: 14px;">Ngân hàng: <strong>MBBank</strong> - STK: <strong>1900969642</strong></p>
+                                <p style="font-size: 13px; color: #666; margin-top: 10px; font-style: italic;">* Lưu ý: Sau khi chuyển khoản thành công, vui lòng ấn "XÁC NHẬN ĐẶT HÀNG" bên dưới để hoàn tất.</p>
                             </div>
                         </div>
 
@@ -67,9 +80,17 @@
                         <span th:text="${item.product.name} + ' x' + ${item.quantity}" style="max-width: 70%;">Product Name x1</span>
                         <span th:text="${#numbers.formatDecimal((item.product.salePrice > 0 ? item.product.salePrice : item.product.originalPrice) * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫'}" style="white-space: nowrap;">Price</span>
                     </div>
-                    <div class="total-row">
-                        <span>TỔNG CỘNG:</span>
-                        <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">Total</span>
+                    <div class="total-row" style="font-size: 16px; color: #ccc; border-top: 1px solid #666;">
+                        <span>TẠM TÍNH:</span>
+                        <span id="subtotal-display" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">Subtotal</span>
+                    </div>
+                    <div class="total-row" id="discount-row" style="display: none; font-size: 16px; color: #ff6b6b; border-top: none; padding-top: 5px; margin-top: 0;">
+                        <span>GIẢM GIÁ (COUPON):</span>
+                        <span id="discount-display">-0₫</span>
+                    </div>
+                    <div class="total-row" style="font-size: 24px; color: #2ecc71; border-top: 1px dashed #666; margin-top: 15px; padding-top: 15px;">
+                        <span>TỔNG THANH TOÁN:</span>
+                        <span id="final-total-display" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">Total</span>
                     </div>
                 </aside>
             </div>
@@ -79,10 +100,31 @@
 
     <script th:inline="javascript">
         const originalTotal = /*[[${total}]]*/ 0;
+        let currentTotal = originalTotal;
+
         const btnApply = document.getElementById('applyCoupon');
         const inputCoupon = document.getElementById('couponCode');
         const msgCoupon = document.getElementById('couponMessage');
-        const displayTotal = document.querySelector('.total-row span:last-child');
+        const displayTotal = document.getElementById('final-total-display');
+        const discountRow = document.getElementById('discount-row');
+        const discountDisplay = document.getElementById('discount-display');
+        
+        const paymentSelect = document.getElementById('paymentMethodSelect');
+        const qrSection = document.getElementById('qrCodeSection');
+        const qrImg = document.getElementById('vietqr-img');
+
+        function updateQRCode() {
+            if (paymentSelect.value === 'E-WALLET') {
+                qrSection.style.display = 'block';
+                // MBBank, Account: 1900969642
+                const qrUrl = `https://img.vietqr.io/image/MB-1900969642-compact2.jpg?amount=${currentTotal}&addInfo=Thanh%20toan%20don%20hang%20EWMI&accountName=CONG%20TY%20EWMI`;
+                qrImg.src = qrUrl;
+            } else {
+                qrSection.style.display = 'none';
+            }
+        }
+
+        paymentSelect.addEventListener('change', updateQRCode);
 
         btnApply.addEventListener('click', function() {
             const code = inputCoupon.value.trim();
@@ -94,15 +136,24 @@
                     if (data.valid) {
                         msgCoupon.style.color = '#2ecc71';
                         msgCoupon.textContent = data.message;
-                        const newTotal = originalTotal - data.discount;
-                        displayTotal.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + '₫';
+                        currentTotal = originalTotal - data.discount;
+                        displayTotal.textContent = new Intl.NumberFormat('vi-VN').format(currentTotal) + '₫';
+                        discountDisplay.textContent = '-' + new Intl.NumberFormat('vi-VN').format(data.discount) + '₫';
+                        discountRow.style.display = 'flex';
+                        updateQRCode(); // Update QR if currently showing
                     } else {
                         msgCoupon.style.color = '#ff6b6b';
                         msgCoupon.textContent = data.message;
+                        currentTotal = originalTotal;
                         displayTotal.textContent = new Intl.NumberFormat('vi-VN').format(originalTotal) + '₫';
+                        discountRow.style.display = 'none';
+                        updateQRCode();
                     }
                 });
         });
+        
+        // Initial setup
+        updateQRCode();
     </script>
 </body>
 </html>

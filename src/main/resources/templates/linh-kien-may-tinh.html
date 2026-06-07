@@ -42,10 +42,89 @@
                     <div class="filter-group" style="background: var(--item-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
                         <div class="filter-title" style="color: #fff; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Khoảng giá</div>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Từ" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
-                            <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="Đến" style="padding: 8px; background: #444; border: 1px solid #555; color: #fff; border-radius: 4px;">
-                            <button type="submit" style="background: var(--primary-blue); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px;">LỌC GIÁ</button>
+                            <div style="position: relative; display: flex; align-items: center; background: #444; border: 1px solid #555; border-radius: 4px; overflow: hidden;">
+                                <button type="button" onclick="adjustPrice('minPriceInput', -1000000)" style="background: #555; color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; width: 35px;">-</button>
+                                <input type="text" id="displayMinPrice" placeholder="Từ" style="flex: 1; padding: 8px; background: transparent; border: none; color: #fff; text-align: center; outline: none; width: 100%; font-size: 14px;" oninput="formatPriceInput(this, 'minPriceInput')" onchange="validatePriceBounds()">
+                                <button type="button" onclick="adjustPrice('minPriceInput', 1000000)" style="background: #555; color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; width: 35px;">+</button>
+                                <input type="hidden" name="minPrice" id="minPriceInput" th:value="${minPrice}">
+                            </div>
+
+                            <div style="position: relative; display: flex; align-items: center; background: #444; border: 1px solid #555; border-radius: 4px; overflow: hidden;">
+                                <button type="button" onclick="adjustPrice('maxPriceInput', -1000000)" style="background: #555; color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; width: 35px;">-</button>
+                                <input type="text" id="displayMaxPrice" placeholder="Đến" style="flex: 1; padding: 8px; background: transparent; border: none; color: #fff; text-align: center; outline: none; width: 100%; font-size: 14px;" oninput="formatPriceInput(this, 'maxPriceInput')" onchange="validatePriceBounds()">
+                                <button type="button" onclick="adjustPrice('maxPriceInput', 1000000)" style="background: #555; color: white; border: none; padding: 8px 12px; cursor: pointer; font-weight: bold; width: 35px;">+</button>
+                                <input type="hidden" name="maxPrice" id="maxPriceInput" th:value="${maxPrice}">
+                            </div>
+                            
+                            <button type="submit" style="background: var(--primary-blue); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px;" onclick="validatePriceBounds()">LỌC GIÁ</button>
                         </div>
+                        
+                        <script>
+                            function formatPriceInput(inputElem, hiddenId) {
+                                let rawValue = inputElem.value.replace(/\D/g, '');
+                                let hiddenInput = document.getElementById(hiddenId);
+                                if (!rawValue) {
+                                    hiddenInput.value = '';
+                                    inputElem.value = '';
+                                    return;
+                                }
+                                let num = parseInt(rawValue, 10);
+                                hiddenInput.value = num;
+                                inputElem.value = new Intl.NumberFormat('vi-VN').format(num);
+                            }
+
+                            function adjustPrice(hiddenId, delta) {
+                                let hiddenInput = document.getElementById(hiddenId);
+                                let displayInput = hiddenId === 'minPriceInput' ? document.getElementById('displayMinPrice') : document.getElementById('displayMaxPrice');
+                                
+                                let current = parseInt(hiddenInput.value || (delta > 0 ? 0 : 1000000), 10);
+                                current += delta;
+                                
+                                if (current < 1000000) current = 1000000;
+                                if (current > 100000000) current = 100000000;
+                                
+                                hiddenInput.value = current;
+                                displayInput.value = new Intl.NumberFormat('vi-VN').format(current);
+                                validatePriceBounds();
+                            }
+
+                            function validatePriceBounds() {
+                                let minInput = document.getElementById('minPriceInput');
+                                let maxInput = document.getElementById('maxPriceInput');
+                                let displayMin = document.getElementById('displayMinPrice');
+                                let displayMax = document.getElementById('displayMaxPrice');
+
+                                // Check minimum boundaries
+                                if (minInput.value && parseInt(minInput.value, 10) < 1000000) {
+                                    minInput.value = 1000000;
+                                    displayMin.value = new Intl.NumberFormat('vi-VN').format(1000000);
+                                }
+                                if (maxInput.value && parseInt(maxInput.value, 10) < 1000000) {
+                                    maxInput.value = 1000000;
+                                    displayMax.value = new Intl.NumberFormat('vi-VN').format(1000000);
+                                }
+
+                                // Check minimum <= maximum
+                                if (minInput.value && maxInput.value) {
+                                    let min = parseInt(minInput.value, 10);
+                                    let max = parseInt(maxInput.value, 10);
+                                    if (min > max) {
+                                        maxInput.value = min;
+                                        displayMax.value = new Intl.NumberFormat('vi-VN').format(min);
+                                    }
+                                }
+                            }
+
+                            document.addEventListener('DOMContentLoaded', () => {
+                                let minInput = document.getElementById('minPriceInput');
+                                let maxInput = document.getElementById('maxPriceInput');
+                                let displayMin = document.getElementById('displayMinPrice');
+                                let displayMax = document.getElementById('displayMaxPrice');
+                                
+                                if (minInput.value) displayMin.value = new Intl.NumberFormat('vi-VN').format(minInput.value);
+                                if (maxInput.value) displayMax.value = new Intl.NumberFormat('vi-VN').format(maxInput.value);
+                            });
+                        </script>
                     </div>
 
                     <!-- Sắp xếp (Hidden input for form submit) -->

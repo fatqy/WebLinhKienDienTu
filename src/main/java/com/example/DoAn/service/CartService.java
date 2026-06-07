@@ -79,7 +79,8 @@ public class CartService {
     
     public void updateQuantity(Long cartItemId, int quantity, User user) {
         if (quantity <= 0) {
-            throw new RuntimeException("Số lượng phải lớn hơn 0");
+            removeFromCart(cartItemId, user);
+            return;
         }
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new RuntimeException("Mặt hàng không tồn tại trong giỏ hàng"));

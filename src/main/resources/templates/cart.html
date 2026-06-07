@@ -92,11 +92,14 @@
             fetch('/cart/update', {
                 method: 'POST',
                 body: formData
-            }).then(response => {
-                if (response.ok) {
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'success') {
                     location.reload();
                 } else {
-                    alert('Lỗi cập nhật giỏ hàng. Vui lòng thử lại.');
+                    alert(data);
+                    location.reload();
                 }
             });
         }

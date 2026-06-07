@@ -3,6 +3,9 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF Tokens for AJAX -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title th:text="${title} + ' – EWMI'"></title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -158,22 +161,111 @@
                     </div>
                 </div>
 
-                <div class="menu-dropdown-container menu-dropdown-right">
+                <div class="menu-dropdown-container menu-dropdown-right" id="header-cart-dropdown" onmouseenter="fetchHeaderCart()">
                     <a href="/cart" class="cart" style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; gap: 8px; height: auto; width: auto; text-decoration: none;">
                         <i class="fas fa-shopping-cart" style="color: #fff; font-size: 18px;"></i>
                         <span style="color: #fff; font-size: 12px; font-weight: bold;">Giỏ hàng</span>
+                        <span id="header-cart-count" style="display: none; background: #e11d48; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; position: absolute; top: -5px; right: -5px;">0</span>
                     </a>
-                    <div class="menu-dropdown-content">
+                    <div class="menu-dropdown-content" id="header-cart-content" style="width: 320px; padding: 15px; max-height: 400px; overflow-y: auto;">
                         <div style="padding: 20px 10px; font-size: 14px; color: #64748b; text-align: center;">
-                            <i class="fas fa-box-open" style="font-size: 36px; color: #cbd5e1; margin-bottom: 12px; background: transparent; width: auto; height: auto;"></i><br>
-                            Giỏ hàng đang trống
+                            <i class="fas fa-circle-notch fa-spin" style="font-size: 24px; color: #cbd5e1; margin-bottom: 12px;"></i><br>
+                            Đang tải...
                         </div>
-                        <div class="menu-divider"></div>
-                        <a href="/cart" class="menu-dropdown-item" style="justify-content: center; color: #0284c7;">
-                            <i class="fas fa-shopping-cart" style="background: transparent; width: auto; height: auto; transform: none;"></i> Xem giỏ hàng
-                        </a>
                     </div>
                 </div>
+
+                <script>
+                    function fetchHeaderCart() {
+                        const contentDiv = document.getElementById('header-cart-content');
+                        const countSpan = document.getElementById('header-cart-count');
+                        
+                        fetch('/cart/api/items')
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.items && data.items.length > 0) {
+                                    countSpan.style.display = 'inline-block';
+                                    countSpan.textContent = data.items.length;
+                                    
+                                    let html = '<h4 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">Sản phẩm mới thêm</h4>';
+                                    
+                                    data.items.forEach(item => {
+                                        const price = new Intl.NumberFormat('vi-VN').format(item.price) + '₫';
+                                        html += `
+                                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                                                <img src="${item.productImage}" style="width: 40px; height: 40px; object-fit: contain; border: 1px solid #eee; border-radius: 4px;">
+                                                <div style="flex: 1; overflow: hidden;">
+                                                    <div style="font-size: 13px; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.productName}</div>
+                                                    <div style="font-size: 12px; color: #e11d48; font-weight: bold; display: flex; align-items: center;">
+                                                        ${price} 
+                                                        <div style="display: inline-flex; align-items: center; background: #f1f5f9; border-radius: 4px; padding: 1px 4px; margin-left: 8px; border: 1px solid #e2e8f0;">
+                                                            <button onclick="updateMiniCartQty(${item.id}, ${item.quantity - 1})" style="background:none; border:none; color:#64748b; cursor:pointer; font-size:12px; padding:0 4px; font-weight: bold;">-</button>
+                                                            <span style="color: #333; font-weight: bold; margin: 0 4px;">${item.quantity}</span>
+                                                            <button onclick="updateMiniCartQty(${item.id}, ${item.quantity + 1})" style="background:none; border:none; color:#64748b; cursor:pointer; font-size:12px; padding:0 4px; font-weight: bold;">+</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    });
+                                    
+                                    html += '<div class="menu-divider"></div>';
+                                    const totalStr = new Intl.NumberFormat('vi-VN').format(data.total) + '₫';
+                                    html += `
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #333;">
+                                            <span>Tổng tiền:</span>
+                                            <span style="color: #e11d48;">${totalStr}</span>
+                                        </div>
+                                        <a href="/cart" style="display: block; width: 100%; background: #e11d48; color: white; text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 14px;">Xem Giỏ Hàng</a>
+                                    `;
+                                    contentDiv.innerHTML = html;
+                                } else {
+                                    countSpan.style.display = 'none';
+                                    contentDiv.innerHTML = `
+                                        <div style="padding: 20px 10px; font-size: 14px; color: #64748b; text-align: center;">
+                                            <i class="fas fa-box-open" style="font-size: 36px; color: #cbd5e1; margin-bottom: 12px;"></i><br>
+                                            Giỏ hàng đang trống
+                                        </div>
+                                    `;
+                                }
+                            })
+                            .catch(err => console.error(err));
+                    }
+                    
+                    function updateMiniCartQty(cartItemId, newQty) {
+                        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+                        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+                        
+                        const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+                        if (csrfToken) headers[csrfHeader] = csrfToken;
+
+                        fetch('/cart/update', {
+                            method: 'POST',
+                            headers: headers,
+                            body: new URLSearchParams({ id: cartItemId, quantity: newQty })
+                        })
+                        .then(res => res.text())
+                        .then(data => {
+                            if (data === 'success') {
+                                fetchHeaderCart();
+                                // Reload page if user is on the full cart page or checkout page to keep values synced
+                                if (window.location.pathname === '/cart' || window.location.pathname === '/checkout') {
+                                    window.location.reload();
+                                }
+                            } else {
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data, showConfirmButton: false, timer: 3000 });
+                                } else {
+                                    alert(data);
+                                }
+                            }
+                        })
+                        .catch(err => console.error(err));
+                    }
+
+                    // Fetch on load to update the badge count
+                    document.addEventListener('DOMContentLoaded', fetchHeaderCart);
+                </script>
                 
                 <div sec:authorize="isAnonymous()" class="menu-dropdown-container menu-dropdown-right">
                     <a href="/login" style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12px; font-weight: bold; text-decoration: none;">
@@ -255,6 +347,21 @@
                         suggestionBox.style.display = 'none';
                     }
                 });
+
+                // Tự động ẩn hiện Header khi cuộn trang
+                let lastScrollTop = 0;
+                const header = document.querySelector('header');
+                window.addEventListener('scroll', function() {
+                    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    if (scrollTop > lastScrollTop && scrollTop > 60) {
+                        // Kéo xuống & vượt qua chiều cao của header -> Ẩn header
+                        header.style.transform = 'translateY(-100%)';
+                    } else {
+                        // Kéo lên -> Hiện header
+                        header.style.transform = 'translateY(0)';
+                    }
+                    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+                }, { passive: true });
             </script>
         </div>
     </header>

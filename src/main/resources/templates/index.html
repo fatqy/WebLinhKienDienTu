@@ -188,7 +188,7 @@
             form.style.display = 'flex';
         });
 
-        // 1. Toast Notification for Cart Add
+        // 1. Toast Notification for Cart Add (MUA NGAY -> Redirect to Checkout)
         document.querySelectorAll('form[action="/cart/add"]').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -204,15 +204,12 @@
                         return;
                     }
                     if(data === 'success') {
-                        Swal.fire({
-                            toast: true, position: 'top-end', icon: 'success',
-                            title: 'Thêm vào giỏ thành công!', showConfirmButton: false, timer: 3000,
-                            background: '#10b981', color: '#fff', iconColor: '#fff'
-                        });
+                        // Redirect directly to checkout
+                        window.location.href = '/checkout';
                     } else {
                         Swal.fire({
                             toast: true, position: 'top-end', icon: 'error',
-                            title: 'Lỗi khi thêm vào giỏ!', showConfirmButton: false, timer: 3000
+                            title: data, showConfirmButton: false, timer: 3000
                         });
                     }
                 });
@@ -262,6 +259,15 @@
                         toast: true, position: 'top-end', icon: 'success', 
                         title: 'Thêm vào giỏ thành công!', showConfirmButton: false, timer: 3000,
                         background: '#10b981', color: '#fff', iconColor: '#fff'
+                    });
+                    // Update header cart dynamically
+                    if (typeof fetchHeaderCart === 'function') {
+                        fetchHeaderCart();
+                    }
+                } else {
+                    Swal.fire({
+                        toast: true, position: 'top-end', icon: 'error',
+                        title: data, showConfirmButton: false, timer: 3000
                     });
                 }
             });

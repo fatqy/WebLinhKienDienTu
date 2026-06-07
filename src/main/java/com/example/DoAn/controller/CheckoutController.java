@@ -42,10 +42,16 @@ public class CheckoutController {
                                   @RequestParam String phoneNumber,
                                   @RequestParam String address,
                                   @RequestParam String paymentMethod,
-                                  @RequestParam(required = false) String couponCode) {
-        User user = userService.findByUsername(authentication.getName()).orElseThrow();
-        orderService.placeOrder(user, fullName, phoneNumber, address, paymentMethod, couponCode);
-        return "redirect:/order-history?success";
+                                  @RequestParam(required = false) String couponCode,
+                                  org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            User user = userService.findByUsername(authentication.getName()).orElseThrow();
+            orderService.placeOrder(user, fullName, phoneNumber, address, paymentMethod, couponCode);
+            return "redirect:/order-history?success";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/checkout";
+        }
     }
 
     @Autowired

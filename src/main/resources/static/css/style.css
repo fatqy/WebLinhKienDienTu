@@ -107,6 +107,12 @@ header {
     position: sticky;
     top: 0;
     z-index: 10000;
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Fix SweetAlert2 toast being hidden by header */
+.swal2-container {
+    z-index: 99999 !important;
 }
 
 .head {

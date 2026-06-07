@@ -216,22 +216,30 @@
         function addToCart() {
             if(maxStock <= 0) return;
             const qty = document.getElementById('qtyInput').value;
-            fetch('/cart/add?productId=' + productId + '&quantity=' + qty, {
+            fetch('/cart/api/add', {
                 method: 'POST',
                 headers: {
-                    // Include CSRF Token if using POST
+                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content
-                }
+                },
+                body: new URLSearchParams({ productId: productId, quantity: qty })
             })
-            .then(response => {
-                if(response.ok) {
-                    alert("Đã thêm sản phẩm vào giỏ hàng!");
-                    window.location.reload();
-                } else if(response.status === 401 || response.status === 403) {
-                    alert("Vui lòng đăng nhập để mua hàng!");
+            .then(response => response.text())
+            .then(data => {
+                if(data === 'success') {
+                    Swal.fire({
+                        toast: true, position: 'top-end', icon: 'success',
+                        title: 'Đã thêm sản phẩm vào giỏ hàng!', showConfirmButton: false, timer: 3000,
+                        background: '#10b981', color: '#fff', iconColor: '#fff'
+                    });
+                    if (typeof fetchHeaderCart === 'function') fetchHeaderCart();
+                } else if(data === 'unauthorized') {
                     window.location.href = '/login';
                 } else {
-                    response.text().then(text => alert(text));
+                    Swal.fire({
+                        toast: true, position: 'top-end', icon: 'error',
+                        title: data, showConfirmButton: false, timer: 3000
+                    });
                 }
             });
         }
@@ -239,15 +247,25 @@
         function buyNow() {
             if(maxStock <= 0) return;
             const qty = document.getElementById('qtyInput').value;
-            fetch('/cart/add?productId=' + productId + '&quantity=' + qty, {
-                method: 'POST'
+            fetch('/cart/api/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content
+                },
+                body: new URLSearchParams({ productId: productId, quantity: qty })
             })
-            .then(response => {
-                if(response.ok) {
-                    window.location.href = '/cart'; // Redirect to cart or checkout
-                } else if(response.status === 401 || response.status === 403) {
-                    alert("Vui lòng đăng nhập để mua hàng!");
+            .then(response => response.text())
+            .then(data => {
+                if(data === 'success') {
+                    window.location.href = '/checkout';
+                } else if(data === 'unauthorized') {
                     window.location.href = '/login';
+                } else {
+                    Swal.fire({
+                        toast: true, position: 'top-end', icon: 'error',
+                        title: data, showConfirmButton: false, timer: 3000
+                    });
                 }
             });
         }
